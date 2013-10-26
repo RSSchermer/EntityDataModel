@@ -1,0 +1,33 @@
+{
+    "name": "rolab/entitydatamodel",
+    "type": "library",
+    "description": "PHP implementation of Entity Data Model.",
+    "keywords": ["entitydatamodel"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Roland S Schermer",
+            "email": "roland0507@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2",
+        "jms/metadata": "~1.1",
+        "doctrine/annotations": "1.*"
+    },
+    "minimum-stability": "dev",
+    "require-dev": {
+        
+    },
+    "autoload": {
+        "psr-0": {
+            "Rolab\\EntityDataModel": ""
+        }
+    },
+    "target-dir": "Rolab/EntityDataModel",
+    "extra": {
+        "branch-alias": {
+            
+        }
+    }
+}
