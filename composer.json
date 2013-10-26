@@ -1,5 +1,5 @@
 {
-    "name": "rolab/entitydatamodel",
+    "name": "rolab/entity-data-model",
     "type": "library",
     "description": "PHP implementation of Entity Data Model.",
     "keywords": ["entitydatamodel"],
