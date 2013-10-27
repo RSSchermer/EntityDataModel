@@ -6,3 +6,5 @@ of an Entity Data Model to serve as context in OData Serialization.
 TODO:
 - Tests
 - Edm caching
+- Metadata drivers for xml and yml
+- Builder
