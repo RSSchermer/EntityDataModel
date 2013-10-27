@@ -9,11 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Rolab\EntityDataModel\Property;
+namespace Rolab\EntityDataModel\Exception;
 
-use Rolab\EntityDataModel\Property\ResourceProperty;
+use Rolab\EntityDataModel\Exception\Exception;
 
-class BagProperty extends ResourceProperty
+class InvalidArgumentException extends \InvalidArgumentException implements Exception
 {
-	
 }

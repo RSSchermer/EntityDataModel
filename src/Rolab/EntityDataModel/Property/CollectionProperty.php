@@ -9,13 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Rolab\EntityDataModel\Type;
+namespace Rolab\EntityDataModel\Property;
 
-abstract class ResourceType
+use Rolab\EntityDataModel\Property\ResourceProperty;
+
+class CollectionProperty extends ResourceProperty
 {
-	abstract public function getName();
 	
-	abstract public function getNamespace();
-	
-	abstract public function getFullName();
 }

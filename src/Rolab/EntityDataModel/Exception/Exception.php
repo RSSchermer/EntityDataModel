@@ -9,13 +9,8 @@
  * file that was distributed with this source code.
  */
 
-namespace Rolab\EntityDataModel\Type;
+namespace Rolab\EntityDataModel\Exception;
 
-abstract class ResourceType
+interface Exception
 {
-	abstract public function getName();
-	
-	abstract public function getNamespace();
-	
-	abstract public function getFullName();
 }

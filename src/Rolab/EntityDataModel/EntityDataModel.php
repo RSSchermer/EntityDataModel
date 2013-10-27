@@ -14,6 +14,7 @@ namespace Rolab\EntityDataModel;
 use ODataProducer\Provider\Metadata\complexType;
 
 use Rolab\EntityDataModel\EntityContainer;
+use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 class EntityDataModel
 {
@@ -37,7 +38,7 @@ class EntityDataModel
 	public function addEntityContainer(EntityContainer $entityContainer)
 	{
 		if (isset($this->entityContainers[$entityContainer->getName()])) {
-			throw new \InvalidArgumentException(sprintf('The entity data model already has a container by the name "%s"', 
+			throw new InvalidArgumentException(sprintf('The entity data model already has a container by the name "%s"', 
 				$entityContainer->getName()));
 		}
 		
@@ -62,7 +63,7 @@ class EntityDataModel
 	public function setDefaultContainer($containerName)
 	{
 		if (empty($this->entityContainers[$containerName])) {
-			throw new \InvalidArgumentException(sprintf('Entity data model does not have container by the name "%s".', 
+			throw new InvalidArgumentException(sprintf('Entity data model does not have container by the name "%s".', 
 				$containerName));
 		}
 		
@@ -107,7 +108,7 @@ class EntityDataModel
 	public function addComplexType(ComplexType $complexType)
 	{
 		if (isset($this->complexTypes[$complexType->getFullName()])) {
-			throw new \InvalidArgumentException(sprintf('The entity data model already has a type by the name "%s"', 
+			throw new InvalidArgumentException(sprintf('The entity data model already has a type by the name "%s"', 
 				$complexType->getFullName()));
 		}
 		

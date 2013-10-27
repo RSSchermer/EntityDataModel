@@ -9,9 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Rolab\ODataProducer\Model\Type;
+namespace Rolab\EntityDataModel\Type;
 
-use Rolab\ODataProducer\Model\Type\ResourceType;
+use Rolab\EntityDataModel\Type\Type\ResourceType;
+use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 class ComplexType extends ResourceType
 {
@@ -66,7 +67,7 @@ class ComplexType extends ResourceType
 	public function addProperty(ResourceProperty $property)
 	{
 		if (isset($this->properties[$property->getName()])) {
-			throw new \InvalidArgumentException(sprintf('Type "%s" already has a property named "%s"',
+			throw new InvalidArgumentException(sprintf('Type "%s" already has a property named "%s"',
 				$this->getFullName(), $property->getName()));
 		}
 		

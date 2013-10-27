@@ -13,6 +13,7 @@ namespace Rolab\EntityDataModel;
 
 use Rolab\EntityDataModel\Type\EntityType;
 use Rolab\EntityDataModel\EntitySet;
+use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 class EntityContainer
 {
@@ -59,6 +60,11 @@ class EntityContainer
 	
 	public function addEntitySet($entitySetName, EntityType $entityType)
 	{
+		if (isset($this->entitySets[$entitySetName])) {
+			throw new InvalidArgumentException(sprintf('The entity container already contains an entity set by the name "%s"', 
+				$entitySetName));
+		}
+		
 		$this->entitySets[$entitySetName] =  new EntitySet($entitySetName, $entityType, $this);
 	}
 	

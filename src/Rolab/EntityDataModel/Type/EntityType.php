@@ -12,6 +12,7 @@
 namespace Rolab\EntityDataModel\Type;
 
 use Rolab\EntityDataModel\Type\ComplexType;
+use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 class EntityType extends ComplexType
 {
@@ -36,7 +37,7 @@ class EntityType extends ComplexType
 		}
 		
 		if (!$hasKey) {
-			throw new \InvalidArgumentException(sprintf('Entity type "%s" must be given atleast one property of type ' .
+			throw new InvalidArgumentException(sprintf('Entity type "%s" must be given atleast one property of type ' .
 				'\Rolab\EntityDataModel\Property\KeyProperty', $this->getFullName()));
 		}
 	}
@@ -44,7 +45,7 @@ class EntityType extends ComplexType
 	public function addProperty(ResourceProperty $property)
 	{
 		if (isset($this->properties[$property->getName()])) {
-			throw new \InvalidArgumentException(sprintf('Type "%s" already has a property named "%s"',
+			throw new InvalidArgumentException(sprintf('Type "%s" already has a property named "%s"',
 				$this->getFullName(), $property->getName()));
 		}
 		
