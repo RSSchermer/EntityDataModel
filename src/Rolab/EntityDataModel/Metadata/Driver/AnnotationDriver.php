@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Reader;
 use Rolab\EntityDataModel\Metadata\ClassMetadata;
 use Rolab\EntityDataModel\Metadata\PrimitivePropertyMetadata;
 use Rolab\EntityDataModel\Metadata\NavigationPropertyMetadata;
-use Rolab\EntityDataModel\Annotations as Edm;
+use Rolab\EntityDataModel\Annotations;
 
 class AnnotationDriver implements DriverInterface
 {
@@ -35,6 +35,7 @@ class AnnotationDriver implements DriverInterface
 		
 		$classMetadata->typeName = $this->readClassAnnotation($class, 'TypeName');
 		$classMetadata->typeNamespace = $this->readClassAnnotation($class, 'TypeNamespace');
+		$classMetadata->setName = $this->readClassAnnotation($class, 'SetName');
 		
 		foreach ($class->getProperties() as $property) {
             $propertyAnnotations = $this->reader->getPropertyAnnotations($property);
@@ -42,28 +43,26 @@ class AnnotationDriver implements DriverInterface
 			foreach ($propertyAnnotations as $annot) {
 				if ($annot instanceof Edm\PrimitiveProperty) {
 					$propertyMetadata = new PrimitivePropertyMetadata($class->getName(), $property->getName());
-					$propertyMetadata->dataType = $annot->dataType;
-					$propertyMetadata->isBag = $annot->isBag;
+					$propertyMetadata->resourceType = $annot->resourceType;
+					$propertyMetadata->isCollection = $annot->isCollection;
 				} elseif ($annot instanceof Edm\KeyProperty) {
 					$propertyMetadata = new PrimitivePropertyMetadata($class->getName(), $property->getName());
-					$propertyMetadata->dataType = $annot->dataType;
+					$propertyMetadata->resourceType = $annot->resourceType;
 					$propertyMetadata->isKey = true;
 				} elseif ($annot instanceof Edm\ETagProperty) {
 					$propertyMetadata = new PrimitivePropertyMetadata($class->getName(), $property->getName());
-					$propertyMetadata->dataType = $annot->dataType;
+					$propertyMetadata->resourceType = $annot->resourceType;
 					$propertyMetadata->isETag = true;
 				} elseif ($annot instanceof Edm\ComplexProperty) {
-					$propertyMetadata = new NavigationPropertyMetadata($class->getName(), $property->getName());
+					$propertyMetadata = new StructuralPropertyMetadata($class->getName(), $property->getName());
 					$propertyMetadata->targetClass = $annot->targetClass;
-					$propertyMetadata->isBag = $annot->isBag;
-				} elseif ($annot instanceof Edm\EntityReferenceProperty) {
-					$propertyMetadata = new NavigationPropertyMetadata($class->getName(), $property->getName());
+					$propertyMetadata->isEntityReference = false;
+					$propertyMetadata->isCollection = $annot->isCollection;
+				} elseif ($annot instanceof Edm\NavigationProperty) {
+					$propertyMetadata = new StructuralPropertyMetadata($class->getName(), $property->getName());
 					$propertyMetadata->targetClass = $annot->targetClass;
 					$propertyMetadata->isEntityReference = true;
-				} elseif ($annot instanceof Edm\EntitySetReferenceProperty) {
-					$propertyMetadata = new NavigationPropertyMetadata($class->getName(), $property->getName());
-					$propertyMetadata->targetClass = $annot->targetClass;
-					$propertyMetadata->isEntitySetReference = true;
+					$propertyMetadata->isCollection = $annot->isCollection;
 				}
 				
 				if ($propertyMetadata) {

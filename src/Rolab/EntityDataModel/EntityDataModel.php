@@ -11,7 +11,7 @@
 
 namespace Rolab\EntityDataModel;
 
-use ODataProducer\Provider\Metadata\complexType;
+use ODataProducer\Provider\Metadata\StructuralType;
 
 use Rolab\EntityDataModel\EntityContainer;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
@@ -20,9 +20,9 @@ class EntityDataModel
 {
     private $entityContainers;
 	
-	private $complexTypes;
+	private $structuralTypes;
 	
-	private $complexTypesByClassName;
+	private $structuralTypesByClassName;
 	
 	private $defaultEntityContainer;
 	
@@ -93,49 +93,49 @@ class EntityDataModel
 		return null;
 	}
 	
-	public function setComplexTypes($complexTypes)
+	public function setStructuralTypes($structuralTypes)
 	{
-		$complexTypes = is_array($complexTypes) ? $complexTypes : array($complexTypes);
+		$structuralTypes = is_array($structuralTypes) ? $structuralTypes : array($structuralTypes);
 		
-		unset($this->complexTypes);
-		unset($this->complexTypesByClassName);
+		unset($this->structuralTypes);
+		unset($this->structuralTypesByClassName);
 		
-		foreach ($complexTypes as $complexType) {
-			$this->addComplexType($complexType);
+		foreach ($structuralTypes as $structuralType) {
+			$this->addStructuralType($structuralType);
 		}
 	}
 	
-	public function addComplexType(ComplexType $complexType)
+	public function addStructuralType(StructuralType $structuralType)
 	{
-		if (isset($this->complexTypes[$complexType->getFullName()])) {
+		if (isset($this->structuralTypes[$structuralType->getFullName()])) {
 			throw new InvalidArgumentException(sprintf('The entity data model already has a type by the name "%s"', 
-				$complexType->getFullName()));
+				$structuralType->getFullName()));
 		}
 		
-		$this->complexTypes[$complexType->getFullName()] = $complexType;
-		$this->complexTypesByClassName[$complexType->getClassName()] = $complexType;
+		$this->structuralTypes[$structuralType->getFullName()] = $structuralType;
+		$this->structuralTypesByClassName[$structuralType->getClassName()] = $structuralType;
 	}
 	
-	public function removeComplexType($complexTypeName)
+	public function removeStructuralType($structuralTypeName)
 	{
-		if ($complexType = $this->getcomplexTypeByName($complexTypeName)) {
-			unset($this->complexTypes[$complexType->getFullName()]);
-			unset($this->complexTypesByClassName[$complexType->getClassName()]);
+		if ($structuralType = $this->getStructuralTypeByName($structuralTypeName)) {
+			unset($this->structuralTypes[$structuralType->getFullName()]);
+			unset($this->structuralTypesByClassName[$structuralType->getClassName()]);
 		}
 	}
 	
-	public function getComplexTypes()
+	public function getStructuralTypes()
 	{
-		return $this->complexTypes;
+		return $this->structuralTypes;
 	}
 	
-	public function getComplexTypeByName($name)
+	public function getStructuralTypeByName($name)
 	{
-		return $this->complexTypes[$name];
+		return $this->structuralTypes[$name];
 	}
 	
-	public function getComplexTypeByClassName($className)
+	public function getStructuralTypeByClassName($className)
 	{
-		return $this->complexTypesByClassName[$className];
+		return $this->structuralTypesByClassName[$className];
 	}
 }

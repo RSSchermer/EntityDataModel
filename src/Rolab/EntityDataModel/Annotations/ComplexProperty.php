@@ -15,8 +15,6 @@ namespace Rolab\EntityDataModel\Annotations;
  * @Annotation
  * @Target("PROPERTY")
  */
-class ComplexProperty extends BaseNavigationProperty
+class ComplexProperty extends StructuralProperty
 {
-	/** @var boolean */
-	public $isBag = false;
 }

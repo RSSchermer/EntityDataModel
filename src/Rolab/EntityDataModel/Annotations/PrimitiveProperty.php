@@ -18,5 +18,5 @@ namespace Rolab\EntityDataModel\Annotations;
 class PrimitiveProperty extends BasePrimitiveProperty
 {
 	/** @var boolean */
-	public $isBag = false;
+	public $isCollection = false;
 }

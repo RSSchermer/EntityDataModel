@@ -15,5 +15,8 @@ use Rolab\EntityDataModel\Property\PrimitiveProperty;
 
 class ETagProperty extends PrimitiveProperty
 {
-	
+	public function __construct($name, PrimitiveType $type)
+	{
+		parent::__construct($name, $type, false);
+	}
 }

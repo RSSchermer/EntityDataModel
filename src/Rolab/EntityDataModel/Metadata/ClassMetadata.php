@@ -19,12 +19,15 @@ class ClassMetadata extends MergeableClassMetadata
 	
 	public $typeNamespace;
 	
+	public $setName;
+	
 	public function serialize()
     {
         return serialize(array(
             $this->name,
             $this->typeName,
             $this->typeNamespace,
+            $this->setName,
             $this->methodMetadata,
             $this->propertyMetadata,
             $this->fileResources,
@@ -38,6 +41,7 @@ class ClassMetadata extends MergeableClassMetadata
             $this->name,
             $this->typeName,
             $this->typeNamespace,
+            $this->setName,
             $this->methodMetadata,
             $this->propertyMetadata,
             $this->fileResources,

@@ -19,10 +19,13 @@ abstract class ResourceProperty
 	
 	private $resourceType;
 	
-	public function __construct($name, ResourceType $resourceType)
+	private $isCollection;
+	
+	public function __construct($name, ResourceType $resourceType, $isCollection = false)
 	{
 		$this->name = $name;
 		$this->resourceType = $resourceType;
+		$this->isCollection = $isCollection;
 	}
 	
 	public function getName()
@@ -33,5 +36,10 @@ abstract class ResourceProperty
 	public function getResourceType()
 	{
 		return $this->resourceType;
+	}
+	
+	public function isCollection()
+	{
+		return $this->isCollection;
 	}
 }

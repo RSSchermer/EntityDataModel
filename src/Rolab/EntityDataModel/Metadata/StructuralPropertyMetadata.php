@@ -13,15 +13,13 @@ namespace Rolab\EntityDataModel\Metadata;
 
 use Metadata\PropertyMetadata;
 
-class NavigationPropertyMetadata extends PropertyMetadata
+class StructuralPropertyMetadata extends PropertyMetadata
 {
 	public $targetClass;
 	
 	public $isEntityReference;
 	
-	public $isEntitySetReference;
-	
-	public $isBag;
+	public $isCollection;
 	
 	public function serialize()
     {
@@ -29,8 +27,7 @@ class NavigationPropertyMetadata extends PropertyMetadata
             $this->class,
             $this->targetClass,
             $this->isEntityReference,
-            $this->isEntitySetReference,
-            $this->isBag,
+            $this->isCollection,
             $this->name,
         ));
     }
@@ -41,8 +38,7 @@ class NavigationPropertyMetadata extends PropertyMetadata
         	$this->class,
         	$this->targetClass,
         	$this->isEntityReference,
-            $this->isEntitySetReference,
-            $this->isBag,
+            $this->isCollection,
         	$this->name
 		) = unserialize($str);
 

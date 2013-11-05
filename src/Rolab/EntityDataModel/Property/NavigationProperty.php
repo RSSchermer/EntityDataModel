@@ -15,13 +15,13 @@ use Rolab\EntityDataModel\Property\ResourceProperty;
 use Rolab\EntityDataModel\Type\EntityType;
 use Rolab\EntityDataModel\EntitySet;
 
-abstract class NavigationProperty extends ResourceProperty
+class NavigationProperty extends ResourceProperty
 {
 	private $targetEntitySet;
 	
-	public function __construct($name, EntitySet $targetEntitySet)
+	public function __construct($name, EntitySet $targetEntitySet, $isCollection = false)
 	{
-		parent::__construct($name, $targetEntitySet->getType());
+		parent::__construct($name, $targetEntitySet->getType(), $isCollection);
 		
 		$this->targetEntitySet = $targetEntitySet;
 	}

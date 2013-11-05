@@ -9,12 +9,8 @@
  * file that was distributed with this source code.
  */
 
-namespace Rolab\EntityDataModel\Annotations;
+namespace Rolab\EntityDataModel\Exception;
 
-/**
- * @Annotation
- * @Target("PROPERTY")
- */
-class EntitySetReferenceProperty extends BaseNavigationProperty
+interface ExceptionInterface
 {
 }

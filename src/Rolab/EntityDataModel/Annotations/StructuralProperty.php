@@ -9,11 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Rolab\EntityDataModel\Property;
+namespace Rolab\EntityDataModel\Annotations;
 
-use Rolab\EntityDataModel\Property\NavigationProperty;
-
-class EntityReferenceProperty extends NavigationProperty
+/**
+ * @Annotation
+ * @Target("PROPERTY")
+ */
+abstract class StructuralProperty
 {
+	/** @var string */
+	public $targetClass;
 	
+	/** @var boolean */
+	public $isCollection = false;
 }

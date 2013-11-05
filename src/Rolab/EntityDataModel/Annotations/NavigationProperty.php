@@ -11,8 +11,10 @@
 
 namespace Rolab\EntityDataModel\Annotations;
 
-abstract class BaseNavigationProperty
+/**
+ * @Annotation
+ * @Target("PROPERTY")
+ */
+class NavigationProperty extends StructuralProperty
 {
-	/** @var string */
-	public $targetClass;
 }
