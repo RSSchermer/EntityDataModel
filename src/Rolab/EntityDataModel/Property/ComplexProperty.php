@@ -16,8 +16,8 @@ use Rolab\EntityDataModel\Type\ComplexType;
 
 class ComplexProperty extends RegularProperty
 {
-	public function __construct($name, ComplexType $type, $isCollection = false)
-	{
-		parent::__construct($name, $type, $isCollection);
-	}
+    public function __construct($name, ComplexType $type, $isCollection = false)
+    {
+        parent::__construct($name, $type, $isCollection);
+    }
 }

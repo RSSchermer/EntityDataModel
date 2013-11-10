@@ -17,9 +17,9 @@ namespace Rolab\EntityDataModel\Annotations;
  */
 abstract class StructuralProperty
 {
-	/** @var string */
-	public $targetClass;
-	
-	/** @var boolean */
-	public $isCollection = false;
+    /** @var string */
+    public $targetClass;
+
+    /** @var boolean */
+    public $isCollection = false;
 }

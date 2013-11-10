@@ -15,8 +15,8 @@ use Rolab\EntityDataModel\Type\StructuralType;
 
 class ComplexType extends StructuralType
 {
-	public function __construct($className, $name, $namespace, array $properties = array(), ComplexType $baseType = null)
-	{
-		parent::__construct($className, $name, $namespace, $properties, $baseType);
-	}
+    public function __construct($className, $name, $namespace, array $properties = array(), ComplexType $baseType = null)
+    {
+        parent::__construct($className, $name, $namespace, $properties, $baseType);
+    }
 }

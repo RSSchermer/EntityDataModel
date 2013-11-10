@@ -13,17 +13,17 @@ namespace Rolab\EntityDataModel\Metadata;
 
 use Metadata\PropertyMetadata;
 
-class PropertyMetadata extends PropertyMetadata
+class PrimitivePropertyMetadata extends PropertyMetadata
 {
-	public $resourceType;
-	
-	public $isKey;
-	
-	public $isETag;
-	
-	public $isCollection;
-	
-	public function serialize()
+    public $resourceType;
+
+    public $isKey;
+
+    public $isETag;
+
+    public $isCollection;
+
+    public function serialize()
     {
         return serialize(array(
             $this->class,
@@ -38,16 +38,15 @@ class PropertyMetadata extends PropertyMetadata
     public function unserialize($str)
     {
         list(
-        	$this->class,
-        	$this->resourceType,
-        	$this->isKey,
+            $this->class,
+            $this->resourceType,
+            $this->isKey,
             $this->isETag,
             $this->isCollection,
-        	$this->name
-		) = unserialize($str);
+            $this->name
+        ) = unserialize($str);
 
         $this->reflection = new \ReflectionProperty($this->class, $this->name);
         $this->reflection->setAccessible(true);
     }
 }
-	

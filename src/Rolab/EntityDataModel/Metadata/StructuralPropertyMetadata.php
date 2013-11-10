@@ -15,13 +15,13 @@ use Metadata\PropertyMetadata;
 
 class StructuralPropertyMetadata extends PropertyMetadata
 {
-	public $targetClass;
-	
-	public $isEntityReference;
-	
-	public $isCollection;
-	
-	public function serialize()
+    public $targetClass;
+
+    public $isEntityReference;
+
+    public $isCollection;
+
+    public function serialize()
     {
         return serialize(array(
             $this->class,
@@ -35,15 +35,14 @@ class StructuralPropertyMetadata extends PropertyMetadata
     public function unserialize($str)
     {
         list(
-        	$this->class,
-        	$this->targetClass,
-        	$this->isEntityReference,
+            $this->class,
+            $this->targetClass,
+            $this->isEntityReference,
             $this->isCollection,
-        	$this->name
-		) = unserialize($str);
+            $this->name
+        ) = unserialize($str);
 
         $this->reflection = new \ReflectionProperty($this->class, $this->name);
         $this->reflection->setAccessible(true);
     }
 }
-	

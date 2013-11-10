@@ -13,7 +13,7 @@ namespace Rolab\EntityDataModel\Builder;
 
 use Rolab\EntityDataModel\Builder\RegularPropertyDefinition;
 
-class PrimitivePropertyDefition extends RegularPropertyDefinition
+class PrimitivePropertyDefinition extends RegularPropertyDefinition
 {
-	
+
 }

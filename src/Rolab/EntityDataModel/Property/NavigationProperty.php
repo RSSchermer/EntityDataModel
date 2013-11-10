@@ -16,17 +16,17 @@ use Rolab\EntityDataModel\EntitySet;
 
 class NavigationProperty extends ResourceProperty
 {
-	private $targetEntitySet;
-	
-	public function __construct($name, EntitySet $targetEntitySet, $isCollection = false)
-	{
-		parent::__construct($name, $targetEntitySet->getType(), $isCollection);
-		
-		$this->targetEntitySet = $targetEntitySet;
-	}
-	
-	public function getTargetEntitySet()
-	{
-		return $this->targetEntitySet;
-	}
+    private $targetEntitySet;
+
+    public function __construct($name, EntitySet $targetEntitySet, $isCollection = false)
+    {
+        parent::__construct($name, $targetEntitySet->getType(), $isCollection);
+
+        $this->targetEntitySet = $targetEntitySet;
+    }
+
+    public function getTargetEntitySet()
+    {
+        return $this->targetEntitySet;
+    }
 }

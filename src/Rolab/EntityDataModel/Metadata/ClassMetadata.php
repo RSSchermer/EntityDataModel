@@ -15,13 +15,13 @@ use Metadata\MergeableClassMetadata;
 
 class ClassMetadata extends MergeableClassMetadata
 {
-	public $typeName;
-	
-	public $typeNamespace;
-	
-	public $setName;
-	
-	public function serialize()
+    public $typeName;
+
+    public $typeNamespace;
+
+    public $setName;
+
+    public function serialize()
     {
         return serialize(array(
             $this->name,

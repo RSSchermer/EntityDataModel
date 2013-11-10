@@ -16,8 +16,8 @@ use Rolab\EntityDataModel\Type\PrimitiveType;
 
 class PrimitiveProperty extends RegularProperty
 {
-	public function __construct($name, PrimitiveType $type, $isCollection = false)
-	{
-		parent::__construct($name, $type, $isCollection);
-	}
+    public function __construct($name, PrimitiveType $type, $isCollection = false)
+    {
+        parent::__construct($name, $type, $isCollection);
+    }
 }

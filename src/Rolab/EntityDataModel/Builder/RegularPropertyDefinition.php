@@ -15,17 +15,17 @@ use Rolab\EntityDataModel\Builder\PropertyDefinition;
 
 abstract class RegularPropertyDefinition extends PropertyDefinition
 {
-	private $typeName;
-	
-	public function __construct($name, $typeName, $isCollection = false)
-	{
-		parent::__construct($name, $isCollection);
-		
-		$this->typeName = $typeName;
-	}
-	
-	public function getTypeName()
-	{
-		return $this->typeName;
-	}
+    private $typeName;
+
+    public function __construct($name, $typeName, $isCollection = false)
+    {
+        parent::__construct($name, $isCollection);
+
+        $this->typeName = $typeName;
+    }
+
+    public function getTypeName()
+    {
+        return $this->typeName;
+    }
 }

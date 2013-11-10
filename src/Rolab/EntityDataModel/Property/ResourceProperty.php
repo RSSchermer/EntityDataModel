@@ -15,31 +15,31 @@ use Rolab\EntityDataModel\Type\ResourceType;
 
 abstract class ResourceProperty
 {
-	private $name;
-	
-	private $resourceType;
-	
-	private $isCollection;
-	
-	public function __construct($name, ResourceType $resourceType, $isCollection = false)
-	{
-		$this->name = $name;
-		$this->resourceType = $resourceType;
-		$this->isCollection = $isCollection;
-	}
-	
-	public function getName()
-	{
-		return $this->name;
-	}
-	
-	public function getResourceType()
-	{
-		return $this->resourceType;
-	}
-	
-	public function isCollection()
-	{
-		return (bool) $this->isCollection;
-	}
+    private $name;
+
+    private $resourceType;
+
+    private $isCollection;
+
+    public function __construct($name, ResourceType $resourceType, $isCollection = false)
+    {
+        $this->name = $name;
+        $this->resourceType = $resourceType;
+        $this->isCollection = $isCollection;
+    }
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function getResourceType()
+    {
+        return $this->resourceType;
+    }
+
+    public function isCollection()
+    {
+        return (bool) $this->isCollection;
+    }
 }

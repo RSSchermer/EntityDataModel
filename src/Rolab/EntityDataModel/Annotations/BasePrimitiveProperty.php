@@ -13,6 +13,6 @@ namespace Rolab\EntityDataModel\Annotations;
 
 abstract class BasePrimitiveProperty
 {
-	/** @var string */
-	public $resourceType;
+    /** @var string */
+    public $resourceType;
 }

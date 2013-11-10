@@ -15,5 +15,5 @@ use Rolab\EntityDataModel\Type\ResourceType;
 
 abstract class PrimitiveType extends ResourceType
 {
-	
+
 }

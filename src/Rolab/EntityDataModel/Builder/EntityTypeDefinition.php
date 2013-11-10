@@ -18,35 +18,35 @@ use Rolab\EntityDataModel\Builder\NavigationPropertyDefinition;
 
 class EntityTypeDefinition extends ComplexTypeDefinition
 {
-	private $navigationPropertyDefinitions = array();
-	
-	public function keyProperty($name, $typeName)
-	{
-		$this->addRegularPropertyDefinition(new KeyPropertyDefinition($name, $typeName));
-	}
-	
-	public function eTagProperty($name, $typeName)
-	{
-		$this->addRegularPropertyDefinition(new ETagPropertyDefinition($name, $typeName));
-	}
-	
-	public function navigationProperty($name, $setName, $isCollection = false)
-	{
-		$this->addNavigationPropertyDefinition(new NavigationPropertyDefinition($name, $setName, $isCollection));
-	}
-	
-	public function addNavigationPropertyDefinition(NavigationPropertyDefinition $navigationPropertyDefinition)
-	{
-		$this->navigationPropertyDefinitions[] = $navigationPropertyDefinition;
-	}
-	
-	public function getPropertyDefinitions()
-	{
-		return array_merge($this->getRegularPropertyDefinitions(), $this->getNavigationPropertyDefinitions());
-	}
-	
-	public function getNavigationPropertyDefinitions()
-	{
-		return $this->navigationPropertyDefinitions;
-	}
+    private $navigationPropertyDefinitions = array();
+
+    public function keyProperty($name, $typeName)
+    {
+        $this->addRegularPropertyDefinition(new KeyPropertyDefinition($name, $typeName));
+    }
+
+    public function eTagProperty($name, $typeName)
+    {
+        $this->addRegularPropertyDefinition(new ETagPropertyDefinition($name, $typeName));
+    }
+
+    public function navigationProperty($name, $setName, $isCollection = false)
+    {
+        $this->addNavigationPropertyDefinition(new NavigationPropertyDefinition($name, $setName, $isCollection));
+    }
+
+    public function addNavigationPropertyDefinition(NavigationPropertyDefinition $navigationPropertyDefinition)
+    {
+        $this->navigationPropertyDefinitions[] = $navigationPropertyDefinition;
+    }
+
+    public function getPropertyDefinitions()
+    {
+        return array_merge($this->getRegularPropertyDefinitions(), $this->getNavigationPropertyDefinitions());
+    }
+
+    public function getNavigationPropertyDefinitions()
+    {
+        return $this->navigationPropertyDefinitions;
+    }
 }

@@ -13,9 +13,9 @@ namespace Rolab\EntityDataModel\Type;
 
 abstract class ResourceType
 {
-	abstract public function getName();
-	
-	abstract public function getNamespace();
-	
-	abstract public function getFullName();
+    abstract public function getName();
+
+    abstract public function getNamespace();
+
+    abstract public function getFullName();
 }

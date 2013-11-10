@@ -13,23 +13,23 @@ namespace Rolab\EntityDataModel\Builder;
 
 class EntitySetDefinition
 {
-	private $name;
-	
-	private $entityTypeName;
-	
-	public function __construct($name, $enityTypeName)
-	{
-		$this->name = $name;
-		$this->entityTypeName = $enityTypeName;
-	}
-	
-	public function getName()
-	{
-		return $name;
-	}
-	
-	public function getEntityTypeName()
-	{
-		return $entityTypeName;
-	}
+    private $name;
+
+    private $entityTypeName;
+
+    public function __construct($name, $enityTypeName)
+    {
+        $this->name = $name;
+        $this->entityTypeName = $enityTypeName;
+    }
+
+    public function getName()
+    {
+        return $name;
+    }
+
+    public function getEntityTypeName()
+    {
+        return $entityTypeName;
+    }
 }

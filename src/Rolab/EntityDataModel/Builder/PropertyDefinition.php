@@ -13,23 +13,23 @@ namespace Rolab\EntityDataModel\Builder;
 
 abstract class PropertyDefinition
 {
-	private $name;
-	
-	private $isCollection;
-	
-	public function __construct($name, $isCollection = false)
-	{
-		$this->name = $name;
-		$this->isCollection = $isCollection;
-	}
-	
-	public function getName()
-	{
-		return $this->name;
-	}
-	
-	public function isCollection()
-	{
-		return (bool) $this->isCollection;
-	}
+    private $name;
+
+    private $isCollection;
+
+    public function __construct($name, $isCollection = false)
+    {
+        $this->name = $name;
+        $this->isCollection = $isCollection;
+    }
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function isCollection()
+    {
+        return (bool) $this->isCollection;
+    }
 }

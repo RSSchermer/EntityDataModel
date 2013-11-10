@@ -1,6 +1,7 @@
 .settings
 vendor
 composer.lock
+php-cs-fixer.phar
 composer.phar*.class
 .project
 *.pyc
