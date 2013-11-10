@@ -12,7 +12,6 @@
 namespace Rolab\EntityDataModel\Property;
 
 use Rolab\EntityDataModel\Property\ResourceProperty;
-use Rolab\EntityDataModel\Type\EntityType;
 use Rolab\EntityDataModel\EntitySet;
 
 class NavigationProperty extends ResourceProperty

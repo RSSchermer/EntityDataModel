@@ -11,13 +11,9 @@
 
 namespace Rolab\EntityDataModel\Property;
 
-use Rolab\EntityDataModel\Property\RegularProperty;
-use Rolab\EntityDataModel\Type\PrimitiveType;
+use Rolab\EntityDataModel\Property\ResourceProperty;
 
-class PrimitiveProperty extends RegularProperty
+abstract class RegularProperty extends ResourceProperty
 {
-	public function __construct($name, PrimitiveType $type, $isCollection = false)
-	{
-		parent::__construct($name, $type, $isCollection);
-	}
+
 }

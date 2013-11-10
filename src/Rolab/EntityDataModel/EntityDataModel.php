@@ -11,8 +11,7 @@
 
 namespace Rolab\EntityDataModel;
 
-use ODataProducer\Provider\Metadata\StructuralType;
-
+use Rolab\EntityDataModel\Type\StructuralType;
 use Rolab\EntityDataModel\EntityContainer;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
@@ -79,7 +78,7 @@ class EntityDataModel
 	public function getEntitySetByName($name)
 	{
 		if (strpos($name, '.')) {
-			list($containerName, $setName) = explode('.', $name);
+			list($containerName, $setName) = explode('.', $name, 2);
 			$container = $this->getEntityContainerByName($containerName);
 		} else {
 			$setName = $name;

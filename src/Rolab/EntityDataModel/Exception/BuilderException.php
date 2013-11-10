@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Rolab\EntityDataModel\Builder;
+namespace Rolab\EntityDataModel\Exception;
 
-use Rolab\EntityDataModel\Builder\StructuralTypeDefinition;
+use Rolab\EntityDataModel\Exception\ExceptionInterface;
 
-class ComplexTypeDefinition extends StructuralTypeDefinition
+class BuilderException extends \RuntimeException implements ExceptionInterface
 {
 }

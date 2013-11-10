@@ -1,20 +1,26 @@
 <?php
 
+/*
+ * This file is part of the Rolab Entity Data Model library.
+ *
+ * (c) Roland Schermer <roland0507@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Rolab\EntityDataModel\Builder;
+
+use Rolab\EntityDataModel\Builder\StructuralTypeDefinition;
+use Rolab\EntityDataModel\Builder\EntityContainerDefinition;
 
 class EntityDataModelDefinition
 {
-	private $structuralTypeDefinitions;
+	private $structuralTypeDefinitions = array();
 	
-	private $entityContainerDefinitions;
+	private $entityContainerDefinitions = array();
 	
 	private $defaultContainerName;
-	
-	public function __construct()
-	{
-		$this->structuralTypeDefinitions = array();
-		$this->entityContainerDefinitions = array();
-	}
 	
 	public function addStructuralTypeDefinition(StructuralTypeDefinition $structuralTypeDefinition)
 	{

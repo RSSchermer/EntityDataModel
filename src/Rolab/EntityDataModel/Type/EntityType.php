@@ -11,7 +11,11 @@
 
 namespace Rolab\EntityDataModel\Type;
 
-use Rolab\EntityDataModel\Type\StructuralType;
+use Rolab\EntityDataModel\Type\ComplexType;
+use Rolab\EntityDataModel\Property\RegularProperty;
+use Rolab\EntityDataModel\Property\NavigationProperty;
+use Rolab\EntityDataModel\Property\KeyProperty;
+use Rolab\EntityDataModel\Property\ETagProperty;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 class EntityType extends ComplexType
@@ -50,7 +54,7 @@ class EntityType extends ComplexType
 	
 	public function getProperties()
 	{
-		return array_merge($this->getSimpleProperties(), $this->getNavigationProperties());
+		return array_merge($this->getRegularProperties(), $this->getNavigationProperties());
 	}
 	
 	public function addProperty(ResourceProperty $property)
@@ -62,8 +66,8 @@ class EntityType extends ComplexType
 		
 		if ($property instanceof NavigationProperty) {
 			$this->addNavigationProperty($property);
-		} elseif ($property instanceof SimpleProperty) {
-			$this->addSimpleProperty($property);
+		} elseif ($property instanceof RegularProperty) {
+			$this->addRegularProperty($property);
 		}
 		
 		if ($property instanceof KeyProperty) {
@@ -94,7 +98,8 @@ class EntityType extends ComplexType
 	
 	public function removeProperty($propertyName)
 	{
-		unset($this->simpleProperties[$propertyName]);
+		parent::removeProperty($propertyName);
+		
 		unset($this->navigationProperties[$propertyName]);
 		unset($this->keyProperties[$propertyName]);
 		unset($this->eTagProperties[$propertyName]);

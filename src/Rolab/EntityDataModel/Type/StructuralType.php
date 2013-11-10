@@ -11,9 +11,9 @@
 
 namespace Rolab\EntityDataModel\Type;
 
-use Rolab\EntityDataModel\Type\Type\ResourceType;
+use Rolab\EntityDataModel\Type\ResourceType;
 use Rolab\EntityDataModel\Property\ResourceProperty;
-use Rolab\EntityDataModel\Property\SimpleProperty;
+use Rolab\EntityDataModel\Property\RegularProperty;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 abstract class StructuralType extends ResourceType
@@ -24,13 +24,13 @@ abstract class StructuralType extends ResourceType
 	
 	private $namespace;
 	
-	protected $simpleProperties;
+	private $regularProperties;
 	
 	private $baseType;
 	
 	public function __construct($className, $name, $namespace, array $properties = array(), StructuralType $baseType = null)
 	{
-		$this->simpleProperties = array();
+		$this->regularProperties = array();
 		
 		$this->className = $className;
 		$this->name = $name;
@@ -61,13 +61,13 @@ abstract class StructuralType extends ResourceType
 	
 	public function getProperties()
 	{
-		return $this->getSimpleProperties();
+		return $this->getRegularProperties();
 	}
 	
-	public function getSimpleProperties()
+	public function getRegularProperties()
 	{
-		return isset($this->baseType) ? array_merge($this->baseType->getSimpleProperties(), $this->simpleProperties) : 
-			$this->simpleProperties;
+		return isset($this->baseType) ? array_merge($this->baseType->getRegularProperties(), $this->regularProperties) : 
+			$this->regularProperties;
 	}
 	
 	public function setProperties(array $properties)
@@ -79,10 +79,10 @@ abstract class StructuralType extends ResourceType
 	
 	public function addProperty(ResourceProperty $property)
 	{
-		$this->addSimpleProperty($property);
+		$this->addRegularProperty($property);
 	}
 	
-	public function addSimpleProperty(SimpleProperty $property)
+	public function addRegularProperty(RegularProperty $property)
 	{
 		$properties = $this->getProperties();
 		
@@ -91,12 +91,12 @@ abstract class StructuralType extends ResourceType
 				$this->getFullName(), $property->getName()));
 		}
 		
-		$this->simpleProperties[$property->getName()] = $property;
+		$this->regularProperties[$property->getName()] = $property;
 	}
 	
 	public function removeProperty($propertyName)
 	{
-		unset($this->simpleProperties[$propertyName]);
+		unset($this->regularProperties[$propertyName]);
 	}
 	
 	public function getPropertyByName($propertyName)

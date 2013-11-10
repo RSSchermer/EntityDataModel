@@ -11,10 +11,10 @@
 
 namespace Rolab\EntityDataModel\Property;
 
-use Rolab\EntityDataModel\Property\SimpleProperty;
+use Rolab\EntityDataModel\Property\RegularProperty;
 use Rolab\EntityDataModel\Type\ComplexType;
 
-class ComplexProperty extends SimpleProperty
+class ComplexProperty extends RegularProperty
 {
 	public function __construct($name, ComplexType $type, $isCollection = false)
 	{

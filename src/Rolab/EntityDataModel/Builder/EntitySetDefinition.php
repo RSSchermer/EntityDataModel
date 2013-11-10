@@ -11,25 +11,25 @@
 
 namespace Rolab\EntityDataModel\Builder;
 
-abstract class PropertyDefinition
+class EntitySetDefinition
 {
 	private $name;
 	
-	private $isCollection;
+	private $entityTypeName;
 	
-	public function __construct($name, $isCollection = false)
+	public function __construct($name, $enityTypeName)
 	{
 		$this->name = $name;
-		$this->isCollection = $isCollection;
+		$this->entityTypeName = $enityTypeName;
 	}
 	
 	public function getName()
 	{
-		return $this->name;
+		return $name;
 	}
 	
-	public function isCollection()
+	public function getEntityTypeName()
 	{
-		return (bool) $this->isCollection;
+		return $entityTypeName;
 	}
 }

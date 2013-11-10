@@ -40,6 +40,6 @@ abstract class ResourceProperty
 	
 	public function isCollection()
 	{
-		return $this->isCollection;
+		return (bool) $this->isCollection;
 	}
 }

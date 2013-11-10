@@ -13,19 +13,19 @@ namespace Rolab\EntityDataModel\Builder;
 
 use Rolab\EntityDataModel\Builder\PropertyDefinition;
 
-class NavigationPropertyDefition extends PropertyDefinition
+abstract class RegularPropertyDefinition extends PropertyDefinition
 {
-	private $entitySetName;
-
-	public function __construct($name, $entitySetName, $isCollection = false)
+	private $typeName;
+	
+	public function __construct($name, $typeName, $isCollection = false)
 	{
 		parent::__construct($name, $isCollection);
 		
-		$this->entitySetName = $entitySetName;
+		$this->typeName = $typeName;
 	}
 	
-	public function getEntitySetName()
+	public function getTypeName()
 	{
-		return $this->entitySetName;
+		return $this->typeName;
 	}
 }

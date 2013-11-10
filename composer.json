@@ -2,7 +2,7 @@
     "name": "rolab/entity-data-model",
     "type": "library",
     "description": "PHP implementation of Entity Data Model.",
-    "keywords": ["entitydatamodel"],
+    "keywords": ["entity", "data", "model"],
     "license": "MIT",
     "authors": [
         {
@@ -21,7 +21,7 @@
     },
     "autoload": {
         "psr-0": {
-            "Rolab\\EntityDataModel": "src/"
+            "Rolab\\EntityDataModel\\": "src/"
         }
     },
     "extra": {

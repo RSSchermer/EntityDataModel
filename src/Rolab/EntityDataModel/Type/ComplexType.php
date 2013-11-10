@@ -11,7 +11,7 @@
 
 namespace Rolab\EntityDataModel\Type;
 
-use Rolab\EntityDataModel\Type\Type\StructuralType;
+use Rolab\EntityDataModel\Type\StructuralType;
 
 class ComplexType extends StructuralType
 {
