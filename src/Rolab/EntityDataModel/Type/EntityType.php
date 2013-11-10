@@ -12,10 +12,10 @@
 namespace Rolab\EntityDataModel\Type;
 
 use Rolab\EntityDataModel\Type\ComplexType;
-use Rolab\EntityDataModel\Property\RegularProperty;
-use Rolab\EntityDataModel\Property\NavigationProperty;
-use Rolab\EntityDataModel\Property\KeyProperty;
-use Rolab\EntityDataModel\Property\ETagProperty;
+use Rolab\EntityDataModel\Type\RegularProperty;
+use Rolab\EntityDataModel\Type\NavigationProperty;
+use Rolab\EntityDataModel\Type\KeyProperty;
+use Rolab\EntityDataModel\Type\ETagProperty;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 class EntityType extends ComplexType
@@ -48,7 +48,7 @@ class EntityType extends ComplexType
 
         if (!$hasKey) {
             throw new InvalidArgumentException(sprintf('Entity type "%s" must be given atleast one property of type ' .
-                '\Rolab\EntityDataModel\Property\KeyProperty', $this->getFullName()));
+                '\Rolab\EntityDataModel\Type\KeyProperty', $this->getFullName()));
         }
     }
 
@@ -106,7 +106,7 @@ class EntityType extends ComplexType
 
         if (count($this->keyProperties) === 0) {
             throw new InvalidArgumentException(sprintf('Entity type "%s" must keep atleast one property of type ' .
-                '\Rolab\EntityDataModel\Property\KeyProperty', $this->getFullName()));
+                '\Rolab\EntityDataModel\Type\KeyProperty', $this->getFullName()));
         }
     }
 

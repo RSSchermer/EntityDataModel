@@ -15,11 +15,11 @@ use Rolab\EntityDataModel\EntityDataModel;
 use Rolab\EntityDataModel\EntityContainer;
 use Rolab\EntityDataModel\Type\ComplexType;
 use Rolab\EntityDataModel\Type\EntityType;
-use Rolab\EntityDataModel\Property\PrimitiveProperty;
-use Rolab\EntityDataModel\Property\ETagProperty;
-use Rolab\EntityDataModel\Property\KeyProperty;
-use Rolab\EntityDataModel\Property\ComplexProperty;
-use Rolab\EntityDataModel\Property\NavigationProperty;
+use Rolab\EntityDataModel\Type\PrimitiveProperty;
+use Rolab\EntityDataModel\Type\ETagProperty;
+use Rolab\EntityDataModel\Type\KeyProperty;
+use Rolab\EntityDataModel\Type\ComplexProperty;
+use Rolab\EntityDataModel\Type\NavigationProperty;
 use Rolab\EntityDataModel\Exception\BuilderException;
 
 class EntityDataModelBuilder

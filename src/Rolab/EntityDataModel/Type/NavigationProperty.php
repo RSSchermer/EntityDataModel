@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Rolab\EntityDataModel\Property;
+namespace Rolab\EntityDataModel\Type;
 
-use Rolab\EntityDataModel\Property\ResourceProperty;
+use Rolab\EntityDataModel\Type\ResourceProperty;
 use Rolab\EntityDataModel\EntitySet;
 
 class NavigationProperty extends ResourceProperty

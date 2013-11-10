@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Rolab\EntityDataModel\Property;
+namespace Rolab\EntityDataModel\Type;
 
-use Rolab\EntityDataModel\Property\PrimitiveProperty;
+use Rolab\EntityDataModel\Type\PrimitiveProperty;
 
-class KeyProperty extends PrimitiveProperty
+class ETagProperty extends PrimitiveProperty
 {
     public function __construct($name, PrimitiveType $type)
     {

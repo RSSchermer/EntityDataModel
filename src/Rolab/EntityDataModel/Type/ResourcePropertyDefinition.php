@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Rolab\EntityDataModel\Property;
+namespace Rolab\EntityDataModel\Type;
 
 use Rolab\EntityDataModel\Type\ResourceType;
 

@@ -12,8 +12,8 @@
 namespace Rolab\EntityDataModel\Type;
 
 use Rolab\EntityDataModel\Type\ResourceType;
-use Rolab\EntityDataModel\Property\ResourceProperty;
-use Rolab\EntityDataModel\Property\RegularProperty;
+use Rolab\EntityDataModel\Type\ResourcePropertyDefinition;
+use Rolab\EntityDataModel\Type\RegularProperty;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 abstract class StructuralType extends ResourceType
@@ -77,7 +77,7 @@ abstract class StructuralType extends ResourceType
         }
     }
 
-    public function addProperty(ResourceProperty $property)
+    public function addProperty(ResourcePropertyDefinition $property)
     {
         $this->addRegularProperty($property);
     }

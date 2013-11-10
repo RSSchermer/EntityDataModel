@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Rolab\EntityDataModel\Property;
+namespace Rolab\EntityDataModel\Type;
 
-use Rolab\EntityDataModel\Property\RegularProperty;
-use Rolab\EntityDataModel\Type\PrimitiveType;
+use Rolab\EntityDataModel\Type\RegularProperty;
+use Rolab\EntityDataModel\Type\ComplexType;
 
-class PrimitiveProperty extends RegularProperty
+class ComplexProperty extends RegularProperty
 {
-    public function __construct($name, PrimitiveType $type, $isCollection = false)
+    public function __construct($name, ComplexType $type, $isCollection = false)
     {
         parent::__construct($name, $type, $isCollection);
     }
