@@ -12,36 +12,30 @@
 namespace Rolab\EntityDataModel\Type;
 
 use Rolab\EntityDataModel\Type\ResourceType;
-use Rolab\EntityDataModel\Type\ResourcePropertyDefinition;
-use Rolab\EntityDataModel\Type\RegularProperty;
+use Rolab\EntityDataModel\Type\PropertyDescription\ResourcePropertyDescription;
+use Rolab\EntityDataModel\Type\PropertyDescription\RegularPropertyDescription;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 abstract class StructuralType extends ResourceType
 {
-    private $className;
-
     private $name;
 
     private $namespace;
+    
+    private $reflection;
 
-    private $regularProperties;
+    private $regularPropertyDescriptions = array();
 
     private $baseType;
 
-    public function __construct($className, $name, $namespace, array $properties = array(), StructuralType $baseType = null)
-    {
-        $this->regularProperties = array();
-
-        $this->className = $className;
+    public function __construct($name, $namespace, \ReflectionClass $reflection, array $propertyDescriptions = array(), 
+        StructuralType $baseType = null
+    ){
         $this->name = $name;
         $this->namespace = $namespace;
-        $this->setProperties($properties);
+        $this->reflection = $reflection;
+        $this->setPropertyDescriptions($propertyDescriptions);
         $this->baseType = $baseType;
-    }
-
-    public function getClassName($className)
-    {
-        return $this->className;
     }
 
     public function getName()
@@ -53,56 +47,62 @@ abstract class StructuralType extends ResourceType
     {
         return $this->namespace;
     }
+    
+    public function getReflection()
+    {
+        return $this->reflection;
+    }
 
     public function getFullName()
     {
         return isset($this->namespace) ?  $this->namespace .'.'. $this->name : $this->name;
     }
 
-    public function getProperties()
+    public function getPropertyDescriptions()
     {
-        return $this->getRegularProperties();
+        return $this->getRegularPropertyDescriptions();
     }
 
-    public function getRegularProperties()
+    public function getRegularPropertyDescriptions()
     {
-        return isset($this->baseType) ? array_merge($this->baseType->getRegularProperties(), $this->regularProperties) :
-            $this->regularProperties;
+        return isset($this->baseType) ? 
+            array_merge($this->baseType->getRegularPropertyDescriptions(), $this->regularPropertyDescriptions) :
+            $this->regularPropertyDescriptions;
     }
 
-    public function setProperties(array $properties)
+    public function setPropertyDescriptions(array $propertyDescriptions)
     {
-        foreach ($properties as $property) {
-            $this->addProperty($property);
+        foreach ($propertyDescriptions as $propertyDescription) {
+            $this->addPropertyDescription($propertyDescription);
         }
     }
 
-    public function addProperty(ResourcePropertyDefinition $property)
+    public function addPropertyDescription(ResourcePropertyDescription $propertyDescription)
     {
-        $this->addRegularProperty($property);
+        $this->addRegularPropertyDescription($propertyDescription);
     }
 
-    public function addRegularProperty(RegularProperty $property)
+    public function addRegularPropertyDescription(RegularPropertyDescription $propertyDescription)
     {
-        $properties = $this->getProperties();
+        $propertyDescriptions = $this->getPropertyDescriptions();
 
-        if (isset($properties[$property->getName()])) {
+        if (isset($propertyDescriptions[$propertyDescription->getName()])) {
             throw new InvalidArgumentException(sprintf('Type "%s" already has a property named "%s"',
-                $this->getFullName(), $property->getName()));
+                $this->getFullName(), $propertyDescription->getName()));
         }
 
-        $this->regularProperties[$property->getName()] = $property;
+        $this->regularPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
     }
 
-    public function removeProperty($propertyName)
+    public function removePropertyDescription($propertyDescriptionName)
     {
-        unset($this->regularProperties[$propertyName]);
+        unset($this->regularPropertyDescriptions[$propertyDescriptionName]);
     }
 
-    public function getPropertyByName($propertyName)
+    public function getPropertyDescriptionByName($propertyDescriptionName)
     {
-        $properties = $this->getProperties();
+        $propertyDescriptions = $this->getPropertyDescriptions();
 
-        return $properties[$propertyName];
+        return $propertyDescriptions[$propertyDescriptionName];
     }
 }

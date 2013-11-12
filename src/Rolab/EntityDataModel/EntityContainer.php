@@ -21,9 +21,13 @@ class EntityContainer
 
     private $namespace;
 
-    private $entitySets;
+    private $entitySets = array();
 
     private $parentContainer;
+    
+    private $associationSets = array();
+    
+    private $associationSetsByAssociationName = array();
 
     public function __construct($name, $namespace, EntityContainer $parentContainer = null)
     {
@@ -79,5 +83,47 @@ class EntityContainer
             : $this->entitySets;
 
         return $entitySets[$name];
+    }
+    
+    public function getAssociationSets()
+    {
+        return isset($this->parentContainer) ? array_merge($this->parentContainer->getAssociationSets(), $this->associationSets)
+            : $this->associationSets;
+    }
+    
+    public function addAssociationSet($associationSetName, Association $association, AssociationSetEnd $setEndOne,
+        AssociationSetEnd $setEndTwo
+    ){
+        if (isset($this->associationSets[$associationSetName])) {
+            throw new InvalidArgumentException(sprintf('The entity container already contains an association set by the name "%s"',
+                $associationSetName));
+        }
+        
+        if (isset($this->associationSetsByAssociationName[$association->getFullName()])) {
+            throw new InvalidArgumentException(sprintf('The entity container already contains an association set for association "%s"',
+                $association->getFullName()));
+        }
+
+        $this->associationSets[$associationSetName] =  new AssociationSet($associationSetName, $association, $setEndOne,
+            $setEndTwo, $this);
+        $this->associationSetsByAssociationName[$association->getFullName()] = $this->associationSets[$associationSetName];
+    }
+    
+    public function removeAssociationSet($associationSetName)
+    {
+        if ($associationSet = $this->getAssociationSetByName($associationSetName)) {
+            unset($this->associationSets[$associationSetName]);
+            unset($this->associationSetsByAssociationName[$associationSet->getAssociation()->getFullName()]);
+        }
+    }
+    
+    public function getAssociationSetByName($associationSetName)
+    {
+        return $this->associationSets[$associationSetName];
+    }
+    
+    public function getAssociationSetByAssociationName($associationName)
+    {
+        return $this->associationSetsByAssociationName[$associationName];
     }
 }

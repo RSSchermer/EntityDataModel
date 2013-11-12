@@ -12,116 +12,113 @@
 namespace Rolab\EntityDataModel\Type;
 
 use Rolab\EntityDataModel\Type\ComplexType;
-use Rolab\EntityDataModel\Type\RegularProperty;
-use Rolab\EntityDataModel\Type\NavigationProperty;
-use Rolab\EntityDataModel\Type\KeyProperty;
-use Rolab\EntityDataModel\Type\ETagProperty;
+use Rolab\EntityDataModel\Type\PropertyDescription\RegularPropertyDescription;
+use Rolab\EntityDataModel\Type\PropertyDescription\NavigationPropertyDescription;
+use Rolab\EntityDataModel\Type\PropertyDescription\KeyPropertyDescription;
+use Rolab\EntityDataModel\Type\PropertyDescription\ETagPropertyDescription;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 class EntityType extends ComplexType
 {
-    private $navigationProperties;
+    private $navigationPropertyDescriptions = array();
 
-    private $keyProperties;
+    private $keyPropertyDescriptions = array();
 
-    private $eTagProperties;
+    private $eTagPropertyDescriptions = array();
 
-    public function __construct($className, $name, $namespace, array $properties, ComplexType $baseType = null)
-    {
-        $this->navigationProperties = array();
-        $this->keyProperties = array();
-        $this->eTagProperties = array();
-
-        parent::__construct($className, $name, $namespace, $properties, $baseType);
+    public function __construct($name, $namespace, \ReflectionClass $reflection, array $propertyDescriptions,
+        ComplexType $baseType = null
+    ){
+        parent::__construct($name, $namespace, $reflection, $propertyDescriptions, $baseType);
     }
 
-    public function setProperties(array $properties)
+    public function setPropertyDescriptions(array $propertyDescriptions)
     {
         $hasKey = false;
-        foreach ($properties as $property) {
-            $this->addProperty($property);
+        foreach ($propertyDescriptions as $propertyDescription) {
+            $this->addPropertyDescription($propertyDescription);
 
-            if ($property instanceof KeyProperty) {
+            if ($propertyDescription instanceof KeyPropertyDescription) {
                 $hasKey = true;
             }
         }
 
         if (!$hasKey) {
             throw new InvalidArgumentException(sprintf('Entity type "%s" must be given atleast one property of type ' .
-                '\Rolab\EntityDataModel\Type\KeyProperty', $this->getFullName()));
+                '\Rolab\EntityDataModel\Type\PropertyDescription\KeyPropertyDescription', $this->getFullName()));
         }
     }
 
-    public function getProperties()
+    public function getPropertyDescriptions()
     {
-        return array_merge($this->getRegularProperties(), $this->getNavigationProperties());
+        return array_merge($this->getRegularPropertyDescriptions(), $this->getNavigationPropertyDescriptions());
     }
 
-    public function addProperty(ResourceProperty $property)
+    public function addPropertyDescription(ResourcePropertyDescription $propertyDescription)
     {
-        if (isset($this->properties[$property->getName()])) {
+        if (isset($this->properties[$propertyDescription->getName()])) {
             throw new InvalidArgumentException(sprintf('Type "%s" already has a property named "%s"',
-                $this->getFullName(), $property->getName()));
+                $this->getFullName(), $propertyDescription->getName()));
         }
 
-        if ($property instanceof NavigationProperty) {
-            $this->addNavigationProperty($property);
-        } elseif ($property instanceof RegularProperty) {
-            $this->addRegularProperty($property);
+        if ($propertyDescription instanceof NavigationPropertyDescription) {
+            $this->addNavigationPropertyDescription($propertyDescription);
+        } elseif ($propertyDescription instanceof RegularPropertyDescription) {
+            $this->addRegularPropertyDescription($propertyDescription);
         }
 
-        if ($property instanceof KeyProperty) {
-            $this->keyProperties[$property->getName()] = $property;
+        if ($propertyDescription instanceof KeyPropertyDescription) {
+            $this->keyPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
         }
 
-        if ($property instanceof ETagProperty) {
-            $this->eTagProperties[$property->getName()] = $property;
+        if ($propertyDescription instanceof ETagPropertyDescription) {
+            $this->eTagPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
         }
     }
 
-    public function addNavigationProperty(NavigationProperty $property)
+    public function addNavigationPropertyDescription(NavigationPropertyDescription $propertyDescription)
     {
-        $properties = $this->getProperties();
+        $propertyDescriptions = $this->getPropertyDescriptions();
 
-        if (isset($properties[$property->getName()])) {
+        if (isset($propertyDescriptions[$propertyDescription->getName()])) {
             throw new InvalidArgumentException(sprintf('Type "%s" already has a property named "%s"',
-                $this->getFullName(), $property->getName()));
+                $this->getFullName(), $propertyDescription->getName()));
         }
 
-        $this->navigationProperties[$property->getName()] = $property;
+        $this->navigationPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
     }
 
-    public function getNavigationProperties()
+    public function getNavigationPropertyDescriptions()
     {
-        return $this->navigationProperties;
+        return $this->navigationPropertyDescriptions;
     }
 
-    public function removeProperty($propertyName)
+    public function removePropertyDescription($propertyDescriptionName)
     {
-        parent::removeProperty($propertyName);
+        parent::removePropertyDescription($propertyDescriptionName);
 
-        unset($this->navigationProperties[$propertyName]);
-        unset($this->keyProperties[$propertyName]);
-        unset($this->eTagProperties[$propertyName]);
+        unset($this->navigationPropertyDescriptions[$propertyDescriptionName]);
+        unset($this->keyPropertyDescriptions[$propertyDescriptionName]);
+        unset($this->eTagPropertyDescriptions[$propertyDescriptionName]);
 
-        if (count($this->keyProperties) === 0) {
+        if (count($this->keyPropertyDescriptions) === 0) {
             throw new InvalidArgumentException(sprintf('Entity type "%s" must keep atleast one property of type ' .
-                '\Rolab\EntityDataModel\Type\KeyProperty', $this->getFullName()));
+                '\Rolab\EntityDataModel\Type\PropertyDescription\KeyPropertyDescription', $this->getFullName()));
         }
     }
 
-    public function getKeyProperties()
+    public function getKeyPropertyDescriptions()
     {
-        return $this->keyProperties;
+        return $this->keyPropertyDescriptions;
     }
 
     public function hasETag()
     {
-        return isset($this->eTagProperties);
+        return isset($this->eTagPropertyDescriptions);
     }
 
-    public function getETagProperties()
+    public function getETagPropertyDescriptions()
     {
-        return $this->eTagProperties;
+        return $this->eTagPropertyDescriptions;
     }
 }

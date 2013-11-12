@@ -12,16 +12,19 @@
 namespace Rolab\EntityDataModel;
 
 use Rolab\EntityDataModel\Type\StructuralType;
+use Rolab\EntityDataModel\Association;
 use Rolab\EntityDataModel\EntityContainer;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 class EntityDataModel
 {
-    private $entityContainers;
+    private $entityContainers =array();
 
-    private $structuralTypes;
+    private $structuralTypes = array();
 
-    private $structuralTypesByClassName;
+    private $structuralTypesByClassName = array();
+    
+    private $associations = array();
 
     private $defaultEntityContainer;
 
@@ -113,14 +116,14 @@ class EntityDataModel
         }
 
         $this->structuralTypes[$structuralType->getFullName()] = $structuralType;
-        $this->structuralTypesByClassName[$structuralType->getClassName()] = $structuralType;
+        $this->structuralTypesByClassName[$structuralType->getReflection()->getName()] = $structuralType;
     }
 
     public function removeStructuralType($structuralTypeName)
     {
-        if ($structuralType = $this->getStructuralTypeByName($structuralTypeName)) {
-            unset($this->structuralTypes[$structuralType->getFullName()]);
-            unset($this->structuralTypesByClassName[$structuralType->getClassName()]);
+        if ($type = $this->getStructuralTypeByName($structuralTypeName)) {
+            unset($this->structuralTypes[$structuralTypeName]);
+            unset($this->structuralTypesByClassName[$type->getReflection()->getName()]);
         }
     }
 
@@ -137,5 +140,41 @@ class EntityDataModel
     public function getStructuralTypeByClassName($className)
     {
         return $this->structuralTypesByClassName[$className];
+    }
+    
+    public function setAssociations($associations)
+    {
+        $associations = is_array($associations) ? $associations : array($associations);
+        
+        unset($this->associations);
+        
+        foreach ($associations as $association) {
+            $this->addAssociation($association);
+        }
+    }
+    
+    public function addAssociation(Association $association)
+    {
+        if (isset($this->associations[$association->getFullName()])) {
+            throw new InvalidArgumentException(sprintf('The entity data model already has an association by the name "%s"',
+                $association->getFullName()));
+        }
+        
+        $this->associations[$association->getFullName()] = $association;
+    }
+    
+    public function removeAssociation($associationName)
+    {
+        unset($this->associations[$associationName]);
+    }
+    
+    public function getAssociations()
+    {
+        return $this->associations;
+    }
+    
+    public function getAssociationByName($associationName)
+    {
+        return $this->associations[$associationName];
     }
 }
