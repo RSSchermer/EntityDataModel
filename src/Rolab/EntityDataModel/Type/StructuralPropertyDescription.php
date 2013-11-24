@@ -30,8 +30,9 @@ abstract class StructuralPropertyDescription extends ResourcePropertyDescription
 
     private $scale;
 
-    public function __construct($name, \ReflectionProperty $reflection, ResourceType $propertyValueType, $isCollection = false)
-    {
+    public function __construct($name, \ReflectionProperty $reflection, ResourceType $propertyValueType, 
+        $isCollection = false
+    ){
         parent::__construct($name, $reflection);
 
         $this->propertyValueType = $propertyValueType;
