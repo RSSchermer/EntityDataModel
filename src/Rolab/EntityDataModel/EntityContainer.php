@@ -14,12 +14,28 @@ namespace Rolab\EntityDataModel;
 use Rolab\EntityDataModel\EntitySet;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
+/**
+ * Defines a logical grouping of entities and their associations. Is used
+ * in the OData protocol to determine accessibility and uri's for entity 
+ * resources.
+ * 
+ * @author Roland Schermer <roland0507@gmail.com>
+ */
 class EntityContainer
 {
+    /**
+     * @var string
+     */
     private $name;
-
+    
+    /**
+     * @var EntityContainer
+     */
     private $parentContainer;
 
+    /**
+     * @var EntityDataModel
+     */
     private $entityDataModel;
 
     private $entitySets = array();

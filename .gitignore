@@ -3,6 +3,8 @@ vendor
 composer.lock
 php-cs-fixer.phar
 phpunit.phar
+phpDocumentor.phar
+doc/reference/api
 composer.phar*.class
 .project
 *.pyc

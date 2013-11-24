@@ -22,9 +22,9 @@ class EntityDataModelTest extends EntityDataModelTestCase
 {
     public function testConstructor()
     {
-        $edm = new EntityDataModel('http://some.url.com', 'Fully.Qualified.Namespace');
+        $edm = new EntityDataModel('ModelName', 'Fully.Qualified.Namespace');
 
-        $this->assertEquals('http://some.url.com', $edm->getUrl());
+        $this->assertEquals('ModelName', $edm->getName());
         $this->assertEquals('Fully.Qualified.Namespace', $edm->getRealNamespace());
         $this->assertNull($edm->getNamespaceAlias());
         $this->assertEquals('Fully.Qualified.Namespace', $edm->getNamespace());
@@ -38,12 +38,12 @@ class EntityDataModelTest extends EntityDataModelTestCase
      */
     public function testExceptionOnInvalidNamespace($invalidNamespace)
     {
-        new EntityDataModel('http://some.url.com', $invalidNamespace);
+        new EntityDataModel('ModelName', $invalidNamespace);
     }
 
     public function testConstructorWithAlias()
     {
-        $edm = new EntityDataModel('http://some.url.com', 'Fully.Qualified.Namespace', 'Self');
+        $edm = new EntityDataModel('ModelName', 'Fully.Qualified.Namespace', 'Self');
 
         $this->assertEquals('Self', $edm->getNamespace());
 
@@ -85,7 +85,7 @@ class EntityDataModelTest extends EntityDataModelTestCase
      */
     public function testAddReferencedModel(EntityDataModel $edm)
     {
-        $referencedModel = new EntityDataModel('http://referenced.url.com', 'Some.Referenced.Model', 'Some.Alias');
+        $referencedModel = new EntityDataModel('ReferencedModelName', 'Some.Referenced.Model', 'Some.Alias');
 
         $edm->addReferencedModel($referencedModel, 'Referenced');
 
@@ -102,7 +102,7 @@ class EntityDataModelTest extends EntityDataModelTestCase
      */
     public function testExceptionOnAddReferencedModelWithSameNamespaceAsModel(EntityDataModel $edm)
     {
-        $referencedModel = new EntityDataModel('http://referenced.url.com', 'Fully.Qualified.Namespace');
+        $referencedModel = new EntityDataModel('ReferencedModelName', 'Fully.Qualified.Namespace');
 
         $edm->addReferencedModel($referencedModel, 'Self');
     }
@@ -113,7 +113,7 @@ class EntityDataModelTest extends EntityDataModelTestCase
      */
     public function testExceptionOnAddReferencedModelWithSameNamespaceAsOtherReferencedModel(EntityDataModel $edm)
     {
-        $referencedModel = new EntityDataModel('http://referenced.url.com', 'Fully.Qualified.Namespace');
+        $referencedModel = new EntityDataModel('ReferencedModelName', 'Fully.Qualified.Namespace');
 
         $edm->addReferencedModel($referencedModel, 'Referenced');
     }
@@ -347,9 +347,9 @@ class EntityDataModelTest extends EntityDataModelTestCase
 
     public function testFindStructuralTypeByFullName()
     {
-        $edm = new EntityDataModel('http://some.url.com', 'Fully.Qualified.Namespace', 'Self');
+        $edm = new EntityDataModel('ModelName', 'Fully.Qualified.Namespace', 'Self');
 
-        $referencedModel = new EntityDataModel('http://referenced.url.com', 'Referenced.Namespace');
+        $referencedModel = new EntityDataModel('ReferencedModelName', 'Referenced.Namespace');
 
         $edm->addReferencedModel($referencedModel, 'Referenced');
 
@@ -371,9 +371,9 @@ class EntityDataModelTest extends EntityDataModelTestCase
 
     public function testFindAssociationByFullName()
     {
-        $edm = new EntityDataModel('http://some.url.com', 'Fully.Qualified.Namespace', 'Self');
+        $edm = new EntityDataModel('ModelName', 'Fully.Qualified.Namespace', 'Self');
 
-        $referencedModel = new EntityDataModel('http://referenced.url.com', 'Referenced.Namespace');
+        $referencedModel = new EntityDataModel('ReferencedModelName', 'Referenced.Namespace');
 
         $edm->addReferencedModel($referencedModel, 'Referenced');
 
@@ -395,9 +395,9 @@ class EntityDataModelTest extends EntityDataModelTestCase
 
     public function testFindEntityContainerByFullName()
     {
-        $edm = new EntityDataModel('http://some.url.com', 'Fully.Qualified.Namespace', 'Self');
+        $edm = new EntityDataModel('ModelName', 'Fully.Qualified.Namespace', 'Self');
 
-        $referencedModel = new EntityDataModel('http://referenced.url.com', 'Referenced.Namespace');
+        $referencedModel = new EntityDataModel('ReferencedModelName', 'Referenced.Namespace');
 
         $edm->addReferencedModel($referencedModel, 'Referenced');
 
