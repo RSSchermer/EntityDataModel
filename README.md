@@ -6,6 +6,5 @@ Rudimentary implementation of Entity Data Model. Primary usecase is to allow con
 of an Entity Data Model to serve as context in OData Serialization. 
 
 TODO:
-- Tests
 - Edm caching
 - Value type validator

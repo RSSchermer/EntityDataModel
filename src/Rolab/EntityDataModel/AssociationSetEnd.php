@@ -17,20 +17,20 @@ use Rolab\EntityDataModel\EntitySet;
 class AssociationSetEnd
 {
     private $associationEnd;
-    
+
     private $entitySet;
-    
+
     public function __construct(AssociationEnd $associationEnd, EntitySet $entitySet)
     {
         $this->associationEnd = $associationEnd;
         $this->entitySet = $entitySet;
     }
-    
+
     public function getAssociationEnd()
     {
         return $this->associationEnd;
     }
-    
+
     public function getEntitySet()
     {
         return $this->entitySet;
