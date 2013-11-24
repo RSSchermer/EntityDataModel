@@ -13,6 +13,7 @@ namespace Rolab\EntityDataModel;
 
 use Rolab\EntityDataModel\EntityContainer;
 use Rolab\EntityDataModel\Type\EntityType;
+use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 class EntitySet
 {
@@ -22,10 +23,19 @@ class EntitySet
 
     private $entityContainer;
 
-    public function __construct($name, EntityType $entityType, EntityContainer $entityContainer)
+    public function __construct($name, EntityType $entityType)
     {
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
+            throw new InvalidArgumentException(sprintf('"%s" is an illegal name for an entity set. The name for ' .
+                'an entity set may only contain alphanumeric characters and underscores.', $name));
+        }
+
         $this->name = $name;
         $this->entityType = $entityType;
+    }
+
+    public function setEntityContainer(EntityContainer $entityContainer)
+    {
         $this->entityContainer = $entityContainer;
     }
 
@@ -43,4 +53,5 @@ class EntitySet
     {
         return $this->entityType;
     }
+
 }

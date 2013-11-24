@@ -12,12 +12,70 @@
 namespace Rolab\EntityDataModel\Type;
 
 use Rolab\EntityDataModel\Type\StructuralType;
+use Rolab\EntityDataModel\Type\ResourcePropertyDescription;
+use Rolab\EntityDataModel\Type\StructuralPropertyDescription;
+use Rolab\EntityDataModel\Exception\InvalidArgumentException;
+use Rolab\EntityDataModel\Exception\RuntimeException;
 
 class ComplexType extends StructuralType
 {
-    public function __construct($name, $namespace, \ReflectionClass $reflection, array $propertyDescriptions = array(),
-        ComplexType $baseType = null
-    ){
-        parent::__construct($name, $namespace, $reflection, $propertyDescriptions, $baseType);
+    private $structuralPropertyDescriptions = array();
+
+    public function __construct($name, \ReflectionClass $reflection, array $propertyDescriptions)
+    {
+        parent::__construct($name, $reflection);
+
+        if (count($propertyDescriptions) === 0) {
+            throw new InvalidArgumentException('May not pass an empty array of property descriptions. A complex ' .
+                'type must always have atleast one property.');
+        }
+
+        foreach ($propertyDescriptions as $propertyDescription) {
+            $this->addPropertyDescription($propertyDescription);
+        }
+    }
+
+    public function addPropertyDescription(ResourcePropertyDescription $propertyDescription)
+    {
+        $propertyDescriptions = $this->getPropertyDescriptions();
+
+        if (isset($propertyDescriptions[$propertyDescription->getName()])) {
+            throw new InvalidArgumentException(sprintf('Type "%s" already has a property named "%s"',
+                $this->getName(), $propertyDescription->getName()));
+        }
+
+        $this->addStructuralPropertyDescription($propertyDescription);
+    }
+
+    public function removePropertyDescription($propertyDescriptionName)
+    {
+        unset($this->structuralPropertyDescriptions[$propertyDescriptionName]);
+
+        if (count($this->getPropertyDescriptions()) === 0) {
+            throw new RuntimeException('A complex type must keep atleast one property.');
+        }
+    }
+
+    public function getPropertyDescriptions()
+    {
+        return $this->getStructuralPropertyDescriptions();
+    }
+
+    public function getStructuralPropertyDescriptions()
+    {
+        return $this->structuralPropertyDescriptions;
+    }
+
+    public function getPropertyDescriptionByName($propertyDescriptionName)
+    {
+        $propertyDescriptions = $this->getPropertyDescriptions();
+
+        return isset($propertyDescriptions[$propertyDescriptionName]) ?
+            $propertyDescriptions[$propertyDescriptionName] : null;
+    }
+
+    protected function addStructuralPropertyDescription(StructuralPropertyDescription $propertyDescription)
+    {
+        $this->structuralPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
     }
 }

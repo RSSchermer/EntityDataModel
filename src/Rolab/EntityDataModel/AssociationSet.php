@@ -13,59 +13,78 @@ namespace Rolab\EntityDataModel;
 
 use Rolab\EntityDataModel\Association;
 use Rolab\EntityDataModel\AssociationSetEnd;
-use Rolab\EntityDataModel\AssociationSetEnd;
 use Rolab\EntityDataModel\EntityContainer;
+use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 class AssociationSet
 {
     private $name;
-    
+
     private $association;
-    
+
     private $setEndOne;
-    
+
     private $setEndTwo;
-    
+
     private $entityContainer;
-    
-    public function __construct($name, Association $association, AssociationSetEnd $setEndOne, AssociationSetEnd $setEndTwo,
-        EntityContainer $entityContainer
-    ){
+
+    public function __construct($name, Association $association, AssociationSetEnd $setEndOne = null,
+        AssociationSetEnd $setEndTwo = null
+    ) {
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
+            throw new InvalidArgumentException(sprintf('"%s" is an illegal name for an association set. The name for ' .
+                'an association set may only contain alphanumeric characters and underscores.', $name));
+        }
+
         $this->name = $name;
         $this->association = $association;
         $this->setEndOne = $setEndOne;
         $this->setEndTwo = $setEndTwo;
+    }
+
+    public function setEntityContainer(EntityContainer $entityContainer)
+    {
         $this->entityContainer = $entityContainer;
     }
-    
+
+    public function getEntityContainer()
+    {
+        return $this->entityContainer;
+    }
+
     public function getName()
     {
         return $this->name;
     }
-    
+
     public function getAssociation()
     {
         return $this->association;
     }
-    
+
     public function getSetEnds()
     {
-        return array($this->setEndOne, $this->setEndTwo);
+        $setEnds = array();
+
+        if (null !== $this->setEndOne) {
+            $setEnds[] = $this->setEndOne;
+        }
+
+        if (null !== $this->setEndTwo) {
+            $setEnds[] = $this->setEndTwo;
+        }
+
+        return $setEnds;
     }
-    
+
     public function getSetEndByRole($role)
     {
-        if ($this->setEndOne->getAssociationEnd()->getRole() === $role) {
+        if (null !== $this->setEndOne && $this->setEndOne->getAssociationEnd()->getRole() === $role) {
             return $this->setEndOne;
-        } elseif ($this->setEndTwo->getAssociationEnd()->getRole() === $role) {
+        } elseif (null !== $this->setEndTwo && $this->setEndTwo->getAssociationEnd()->getRole() === $role) {
             return $this->setEndTwo;
         }
-        
+
         return null;
-    }
-    
-    public function getEntityContainer()
-    {
-        return $this->entityContainer;
     }
 }

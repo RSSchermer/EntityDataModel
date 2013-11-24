@@ -18,113 +18,115 @@ use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 class EntityDataModel
 {
-    private $entityContainers =array();
+    private $url;
+
+    private $realNamespace;
+
+    private $namespaceAlias;
+
+    private $referencedModels = array();
 
     private $structuralTypes = array();
 
     private $structuralTypesByClassName = array();
-    
+
     private $associations = array();
+
+    private $entityContainers = array();
 
     private $defaultEntityContainer;
 
-    public function setEntityContainers($entityContainers)
+    public function __construct($url, $realNamespace, $namespaceAlias = null)
     {
-        $entityContainers = is_array($entityContainers) ? $entityContainers : array($entityContainers);
+        $this->url = $url;
 
-        foreach ($entityContainers as $entityContainer) {
-            $this->addEntityContainer($entityContainer);
-        }
-    }
-
-    public function addEntityContainer(EntityContainer $entityContainer)
-    {
-        if (isset($this->entityContainers[$entityContainer->getName()])) {
-            throw new InvalidArgumentException(sprintf('The entity data model already has a container by the name "%s"',
-                $entityContainer->getName()));
+        if (!preg_match('/^[A-Za-z0-9_\.]+$/', $realNamespace)) {
+            throw new InvalidArgumentException(sprintf('"%s" is an illegal namespace for an entity data model. ' .
+                'The namespace for an entity data model may only contain alphanumeric characters, underscores and ' .
+                'dots.', $realNamespace));
         }
 
-        $this->entityContainers[$entityContainer->getName()] = $entityContainer;
+        $this->realNamespace = $realNamespace;
+        $this->setNamespaceAlias($namespaceAlias);
     }
 
-    public function removeEntityContainer($containerName)
+    public function getUrl()
     {
-        unset($this->entityContainers[$containerName]);
+        return $this->url;
     }
 
-    public function getEntityContainers()
+    public function getRealNamespace()
     {
-        return $this->entityContainers;
+        return $this->realNamespace;
     }
 
-    public function getEntityContainerByName($name)
+    public function getNamespaceAlias()
     {
-        return $this->entityContainers[$name];
+        return $this->namespaceAlias;
     }
 
-    public function setDefaultContainer($containerName)
+    public function getNamespace()
     {
-        if (empty($this->entityContainers[$containerName])) {
-            throw new InvalidArgumentException(sprintf('Entity data model does not have container by the name "%s".',
-                $containerName));
+        return isset($this->namespaceAlias) ? $this->namespaceAlias : $this->realNamespace;
+    }
+
+    public function setNamespaceAlias($namespaceAlias)
+    {
+        if (null !== $namespaceAlias && !preg_match('/^[A-Za-z0-9_\.]+$/', $namespaceAlias)) {
+            throw new InvalidArgumentException(sprintf('"%s" is an illegal namespace alias for an entity data model. ' .
+                'The namespace alias for an entity data model may only contain alphanumeric characters, ' .
+                'underscores and dots.', $namespaceAlias));
         }
 
-        $this->defaultEntityContainer = $this->entityContainers[$containerName];
+        $this->namespaceAlias = $namespaceAlias;
     }
 
-    public function getDefaultEntityContainer()
+    public function addReferencedModel(EntityDataModel $referencedModel, $namespaceAlias = null)
     {
-        $containers = array_values($this->entityContainers);
+        if (isset($namespaceAlias)) {
+            $referencedModel->setNamespaceAlias($namespaceAlias);
+        }
 
-        return isset($this->defaultEntityContainer) ? $this->defaultEntityContainer : $containers[0];
+        $namespace = $referencedModel->getNamespace();
+
+        if (isset($this->referencedModels[$namespace]) || $namespace === $this->getNamespace()) {
+            throw new InvalidArgumentException(sprintf('Namespace "%s" is already used by some other referenced ' .
+                'entity data model. Please specify an alias as the second argument.', $namespace));
+        }
+
+        $this->referencedModels[$namespace] = $referencedModel;
     }
 
-    public function getEntitySetByName($name)
+    public function getReferencedModels()
     {
-        if (strpos($name, '.')) {
-            list($containerName, $setName) = explode('.', $name, 2);
-            $container = $this->getEntityContainerByName($containerName);
-        } else {
-            $setName = $name;
-            $container = $this->getDefaultEntityContainer();
-        }
-
-        if (isset($container)) {
-            return $container->getEntitySetByName($setName);
-        }
-
-        return null;
+        return $this->referencedModels;
     }
 
-    public function setStructuralTypes($structuralTypes)
+    public function getReferencedModelByNamespace($namespace)
     {
-        $structuralTypes = is_array($structuralTypes) ? $structuralTypes : array($structuralTypes);
-
-        unset($this->structuralTypes);
-        unset($this->structuralTypesByClassName);
-
-        foreach ($structuralTypes as $structuralType) {
-            $this->addStructuralType($structuralType);
-        }
+        return isset($this->referencedModels[$namespace]) ? $this->referencedModels[$namespace] : null;
     }
 
     public function addStructuralType(StructuralType $structuralType)
     {
-        if (isset($this->structuralTypes[$structuralType->getFullName()])) {
-            throw new InvalidArgumentException(sprintf('The entity data model already has a type by the name "%s"',
-                $structuralType->getFullName()));
+        if (isset($this->structuralTypes[$structuralType->getName()])) {
+            throw new InvalidArgumentException(sprintf(
+                'The entity data model already has a type by the name "%s".',
+                $structuralType->getName()
+            ));
         }
 
-        $this->structuralTypes[$structuralType->getFullName()] = $structuralType;
-        $this->structuralTypesByClassName[$structuralType->getReflection()->getName()] = $structuralType;
-    }
-
-    public function removeStructuralType($structuralTypeName)
-    {
-        if ($type = $this->getStructuralTypeByName($structuralTypeName)) {
-            unset($this->structuralTypes[$structuralTypeName]);
-            unset($this->structuralTypesByClassName[$type->getReflection()->getName()]);
+        if (isset($this->structuralTypesByClassName[$structuralType->getClassName()])) {
+            throw new InvalidArgumentException(sprintf(
+                'The entity data model already has a type of class "%s".',
+                $structuralType->getClassName()
+            ));
         }
+
+        $this->structuralTypes[$structuralType->getName()] = $structuralType;
+        $this->structuralTypesByClassName[$structuralType->getClassName()] = $structuralType;
+
+        $structuralType->setEntityDataModel($this);
     }
 
     public function getStructuralTypes()
@@ -134,47 +136,141 @@ class EntityDataModel
 
     public function getStructuralTypeByName($name)
     {
-        return $this->structuralTypes[$name];
+        return isset($this->structuralTypes[$name]) ? $this->structuralTypes[$name] : null;
     }
 
     public function getStructuralTypeByClassName($className)
     {
-        return $this->structuralTypesByClassName[$className];
+        return isset($this->structuralTypesByClassName[$className]) ?
+            $this->structuralTypesByClassName[$className] : null;
     }
-    
-    public function setAssociations($associations)
-    {
-        $associations = is_array($associations) ? $associations : array($associations);
-        
-        unset($this->associations);
-        
-        foreach ($associations as $association) {
-            $this->addAssociation($association);
-        }
-    }
-    
+
     public function addAssociation(Association $association)
     {
-        if (isset($this->associations[$association->getFullName()])) {
-            throw new InvalidArgumentException(sprintf('The entity data model already has an association by the name "%s"',
-                $association->getFullName()));
+        if (isset($this->associations[$association->getName()])) {
+            throw new InvalidArgumentException(sprintf(
+                'The entity data model already has an association by the name "%s"',
+                $association->getName()
+            ));
         }
-        
-        $this->associations[$association->getFullName()] = $association;
+
+        $this->associations[$association->getName()] = $association;
+
+        $association->setEntityDataModel($this);
     }
-    
-    public function removeAssociation($associationName)
-    {
-        unset($this->associations[$associationName]);
-    }
-    
+
     public function getAssociations()
     {
         return $this->associations;
     }
-    
-    public function getAssociationByName($associationName)
+
+    public function getAssociationByName($name)
     {
-        return $this->associations[$associationName];
+        return isset($this->associations[$name]) ? $this->associations[$name] : null;
+    }
+
+    public function addEntityContainer(EntityContainer $entityContainer)
+    {
+        if (isset($this->entityContainers[$entityContainer->getName()])) {
+            throw new InvalidArgumentException(sprintf(
+                'The entity data model already has a container by the name "%s"',
+                $entityContainer->getName()
+            ));
+        }
+
+        $this->entityContainers[$entityContainer->getName()] = $entityContainer;
+
+        $entityContainer->setEntityDataModel($this);
+
+        if (count($this->entityContainers) === 1) {
+            $this->setDefaultEntityContainer($entityContainer->getName());
+        }
+    }
+
+    public function getEntityContainers()
+    {
+        return $this->entityContainers;
+    }
+
+    public function getEntityContainerByName($name)
+    {
+        return isset($this->entityContainers[$name]) ? $this->entityContainers[$name] : null;
+    }
+
+    public function setDefaultEntityContainer($containerName)
+    {
+        if (empty($this->entityContainers[$containerName])) {
+            throw new InvalidArgumentException(sprintf(
+                'Entity data model does not have container by the name "%s".',
+                $containerName
+            ));
+        }
+
+        $this->defaultEntityContainer = $this->entityContainers[$containerName];
+    }
+
+    public function getDefaultEntityContainer()
+    {
+        return $this->defaultEntityContainer;
+    }
+
+    public function findStructuralTypeByFullName($fullName)
+    {
+        list($namespace, $name) = $this->getNamespaceNameFromFullName($fullName);
+
+        if ($namespace === null || $namespace === $this->getRealNamespace()
+            || $namespace === $this->getNamespaceAlias()
+        ) {
+            return $this->getStructuralTypeByName($name);
+        } elseif ($referencedModel = $this->getReferencedModelByNamespace($namespace)) {
+            return $referencedModel->getStructuralTypeByName($name);
+        }
+
+        return null;
+    }
+
+    public function findAssociationByFullName($fullName)
+    {
+        list($namespace, $name) = $this->getNamespaceNameFromFullName($fullName);
+
+        if ($namespace === null || $namespace === $this->getRealNamespace()
+            || $namespace === $this->getNamespaceAlias()
+        ) {
+            return $this->getAssociationByName($name);
+        } elseif ($referencedModel = $this->getReferencedModelByNamespace($namespace)) {
+            return $referencedModel->getAssociationByName($name);
+        }
+
+        return null;
+    }
+
+    public function findEntityContainerByFullName($fullName)
+    {
+        list($namespace, $name) = $this->getNamespaceNameFromFullName($fullName);
+
+        if ($namespace === null || $namespace === $this->getRealNamespace()
+            || $namespace === $this->getNamespaceAlias()
+        ) {
+            return $this->getEntityContainerByName($name);
+        } elseif ($referencedModel = $this->getReferencedModelByNamespace($namespace)) {
+            return $referencedModel->getEntityContainerByName($name);
+        }
+
+        return null;
+    }
+
+    private function getNamespaceNameFromFullName($fullName)
+    {
+        $lastDotPos = stripos($fullName, '.');
+
+        if (false !== $lastDotPos) {
+            $namespace = substr($fullName, 0, $lastDotPos);
+            $name = substr($fullName, $lastDotPos + 1);
+        } else {
+            $namespace = null;
+            $name = $fullName;
+        }
+
+        return array($namespace, $name);
     }
 }

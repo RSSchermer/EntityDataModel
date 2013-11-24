@@ -11,31 +11,37 @@
 
 namespace Rolab\EntityDataModel\Type;
 
+use Rolab\EntityDataModel\EntityDataModel;
 use Rolab\EntityDataModel\Type\ResourceType;
-use Rolab\EntityDataModel\Type\PropertyDescription\ResourcePropertyDescription;
-use Rolab\EntityDataModel\Type\PropertyDescription\RegularPropertyDescription;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 abstract class StructuralType extends ResourceType
 {
     private $name;
 
-    private $namespace;
-    
     private $reflection;
 
-    private $regularPropertyDescriptions = array();
+    private $entityDataModel;
 
-    private $baseType;
+    public function __construct($name, \ReflectionClass $reflection)
+    {
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
+            throw new InvalidArgumentException(sprintf('"%s" is an illegal name for a structural type. The name for ' .
+                'a structural type may only contain alphanumeric characters and underscores.', $name));
+        }
 
-    public function __construct($name, $namespace, \ReflectionClass $reflection, array $propertyDescriptions = array(), 
-        StructuralType $baseType = null
-    ){
         $this->name = $name;
-        $this->namespace = $namespace;
         $this->reflection = $reflection;
-        $this->setPropertyDescriptions($propertyDescriptions);
-        $this->baseType = $baseType;
+    }
+
+    public function setEntityDataModel(EntityDataModel $entityDataModel)
+    {
+        $this->entityDataModel = $entityDataModel;
+    }
+
+    public function getEntityDataModel()
+    {
+        return $this->entityDataModel;
     }
 
     public function getName()
@@ -45,64 +51,21 @@ abstract class StructuralType extends ResourceType
 
     public function getNamespace()
     {
-        return $this->namespace;
+        return isset($this->entityDataModel) ? $this->entityDataModel->getNamespace() : null;
     }
-    
+
     public function getReflection()
     {
         return $this->reflection;
     }
 
+    public function getClassName()
+    {
+        return $this->reflection->getName();
+    }
+
     public function getFullName()
     {
-        return isset($this->namespace) ?  $this->namespace .'.'. $this->name : $this->name;
-    }
-
-    public function getPropertyDescriptions()
-    {
-        return $this->getRegularPropertyDescriptions();
-    }
-
-    public function getRegularPropertyDescriptions()
-    {
-        return isset($this->baseType) ? 
-            array_merge($this->baseType->getRegularPropertyDescriptions(), $this->regularPropertyDescriptions) :
-            $this->regularPropertyDescriptions;
-    }
-
-    public function setPropertyDescriptions(array $propertyDescriptions)
-    {
-        foreach ($propertyDescriptions as $propertyDescription) {
-            $this->addPropertyDescription($propertyDescription);
-        }
-    }
-
-    public function addPropertyDescription(ResourcePropertyDescription $propertyDescription)
-    {
-        $this->addRegularPropertyDescription($propertyDescription);
-    }
-
-    public function addRegularPropertyDescription(RegularPropertyDescription $propertyDescription)
-    {
-        $propertyDescriptions = $this->getPropertyDescriptions();
-
-        if (isset($propertyDescriptions[$propertyDescription->getName()])) {
-            throw new InvalidArgumentException(sprintf('Type "%s" already has a property named "%s"',
-                $this->getFullName(), $propertyDescription->getName()));
-        }
-
-        $this->regularPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
-    }
-
-    public function removePropertyDescription($propertyDescriptionName)
-    {
-        unset($this->regularPropertyDescriptions[$propertyDescriptionName]);
-    }
-
-    public function getPropertyDescriptionByName($propertyDescriptionName)
-    {
-        $propertyDescriptions = $this->getPropertyDescriptions();
-
-        return $propertyDescriptions[$propertyDescriptionName];
+        return isset($this->entityDataModel) ? $this->entityDataModel->getNamespace() .'.'. $this->name : $this->name;
     }
 }
