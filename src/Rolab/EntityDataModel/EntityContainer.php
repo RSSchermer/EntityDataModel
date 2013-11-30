@@ -16,9 +16,11 @@ use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
  * Defines a logical grouping of entities and their associations. Is used
- * in the OData protocol to determine accessibility and uri's for entity 
- * resources.
- * 
+ * in the OData protocol to determine accessibility and uri's for entity
+ * resources. An entity container may have a parent container. Entity sets
+ * and association sets in the child container may then references any of 
+ * the entity sets and association sets in the parent container. 
+ *
  * @author Roland Schermer <roland0507@gmail.com>
  */
 class EntityContainer
@@ -27,7 +29,7 @@ class EntityContainer
      * @var string
      */
     private $name;
-    
+
     /**
      * @var EntityContainer
      */
@@ -38,10 +40,28 @@ class EntityContainer
      */
     private $entityDataModel;
 
+    /**
+     * @var array
+     */
     private $entitySets = array();
-
+    
+    /**
+     * @var array
+     */
     private $associationSets = array();
-
+    
+    /**
+     * Creates a new entity container.
+     * 
+     * Creates a new entity container. A parent container may be specified, in which
+     * case entity sets and association sets in the container may reference any of the
+     * entity sets and association sets in the parent container.
+     * 
+     * @param string               $name            The name of the entity container (must container 
+     *                                              only alphanumber characters and underscores).
+     * @param null|EntityContainer $parentContainer An optional parent container for the entity 
+     *                                              container
+     */
     public function __construct($name, EntityContainer $parentContainer = null)
     {
         if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
@@ -52,17 +72,35 @@ class EntityContainer
         $this->name = $name;
         $this->parentContainer = $parentContainer;
     }
-
+    
+    /**
+     * Sets the entity data model the container is a part of.
+     * 
+     * Sets the entity data model the container is a part of. An entity container should
+     * always be part of some entity data model.
+     * 
+     * @param EntityDataModel $entityDataModel The entity data model the entity container is
+     *                                         a part of.
+     */
     public function setEntityDataModel(EntityDataModel $entityDataModel)
     {
         $this->entityDataModel = $entityDataModel;
     }
-
+    
+    /**
+     * Returns the entity data model the entity container is a part of.
+     * 
+     * @return null|EntityDataModel The entity data model the entity container is a part of
+     *                              or null if no entity data model is assigned yet.
+     */
     public function getEntityDataModel()
     {
         return $this->entityDataModel;
     }
-
+    
+    /**
+     * 
+     */
     public function getName()
     {
         return $this->name;

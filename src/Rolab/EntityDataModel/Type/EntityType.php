@@ -126,7 +126,7 @@ class EntityType extends ComplexType
     public function getStructuralPropertyDescriptions()
     {
         return isset($this->baseType) ? array_merge(
-                $this->baseType->getStructuralPropertyDescriptions(), 
+                $this->baseType->getStructuralPropertyDescriptions(),
                 parent::getStructuralPropertyDescriptions()
             ) : parent::getStructuralPropertyDescriptions();
     }
