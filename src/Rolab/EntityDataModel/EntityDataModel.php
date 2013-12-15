@@ -19,7 +19,7 @@ use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 /**
  * Representation of an entity data model. The entity data model consists of
  * structural types, associations and entity containers. It should be uniquely
- * identified by a name in order to enable entity data model caching.
+ * identified by a URI.
  *
  * @author Roland Schermer <roland0507@gmail.com>
  */
@@ -28,7 +28,7 @@ class EntityDataModel
     /**
      * @var string
      */
-    private $name;
+    private $uri;
 
     /**
      * @var string
@@ -71,9 +71,9 @@ class EntityDataModel
     private $defaultEntityContainer;
 
     /**
-     * Create new entity data model
+     * Create new entity data model.
      *
-     * @param string      $name           Name for the entity data model, should be unique to allow caching.
+     * @param string      $uri            URI for the entity data model
      * @param string      $realNamespace  Fully qualified namespace for the entity data model (must consist of
      *                                    only alphanumeric characters, underscores and dots).
      * @param null|string $namespaceAlias Optional shorter namespace alias for easier referencing and to increase
@@ -83,9 +83,9 @@ class EntityDataModel
      * @throws InvalidArgumentException Thrown if the real namespace contains illegal characters or
      *                                  if the namespace alias contains illegal characters.
      */
-    public function __construct($name, $realNamespace, $namespaceAlias = null)
+    public function __construct($uri, $realNamespace, $namespaceAlias = null)
     {
-        $this->name = $name;
+        $this->uri = $uri;
 
         if (!preg_match('/^[A-Za-z0-9_\.]+$/', $realNamespace)) {
             throw new InvalidArgumentException(sprintf('"%s" is an illegal namespace for an entity data model. ' .
@@ -98,13 +98,13 @@ class EntityDataModel
     }
 
     /**
-     * Returns the name of the entity data model.
+     * Returns the URI of the entity data model.
      *
-     * @return string The name of the entity data model.
+     * @return string The URI of the entity data model.
      */
-    public function getName()
+    public function getUri()
     {
-        return $this->name;
+        return $this->uri;
     }
 
     /**
