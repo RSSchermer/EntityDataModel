@@ -11,7 +11,9 @@
 
 namespace Rolab\EntityDataModel;
 
+use Rolab\EntityDataModel\NamedModelElement;
 use Rolab\EntityDataModel\EntitySet;
+use Rolab\EntityDataModel\AssociationSet;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
@@ -23,22 +25,12 @@ use Rolab\EntityDataModel\Exception\InvalidArgumentException;
  *
  * @author Roland Schermer <roland0507@gmail.com>
  */
-class EntityContainer
+class EntityContainer extends NamedModelElement
 {
-    /**
-     * @var string
-     */
-    private $name;
-
     /**
      * @var EntityContainer
      */
     private $parentContainer;
-
-    /**
-     * @var EntityDataModel
-     */
-    private $entityDataModel;
 
     /**
      * @var array
@@ -66,61 +58,9 @@ class EntityContainer
      */
     public function __construct($name, EntityContainer $parentContainer = null)
     {
-        if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
-            throw new InvalidArgumentException(sprintf('"%s" is an illegal name for a container. The name for ' .
-                'a container may only contain alphanumeric characters and underscores.', $name));
-        }
-
-        $this->name = $name;
+        parent::__construct($name);
+        
         $this->parentContainer = $parentContainer;
-    }
-    
-    /**
-     * Sets the entity data model the container is a part of.
-     * 
-     * Sets the entity data model the container is a part of. An entity container should
-     * always be part of some entity data model.
-     * 
-     * @param EntityDataModel $entityDataModel The entity data model the entity container is
-     *                                         a part of.
-     */
-    public function setEntityDataModel(EntityDataModel $entityDataModel)
-    {
-        $this->entityDataModel = $entityDataModel;
-    }
-    
-    /**
-     * Returns the entity data model the entity container is a part of.
-     * 
-     * @return null|EntityDataModel The entity data model the entity container is a part of
-     *                              or null if no entity data model is assigned yet.
-     */
-    public function getEntityDataModel()
-    {
-        return $this->entityDataModel;
-    }
-    
-    /**
-     * Returns the name of the entity container without namespace prefix.
-     *
-     * @return string The name of the entity container.
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-    
-    /**
-     * Returns the full name of the entity container with namespace prefix.
-     * 
-     * Returns the name of the entity container with namespace prefix if an entity data
-     * model was set or the name without a prefix if no entity data model was set.
-     *
-     * @return string The full name of the entity container.
-     */
-    public function getFullName()
-    {
-        return isset($this->entityDataModel) ? $this->entityDataModel->getNamespace() .'.'. $this->name : $this->name;
     }
     
     /**
@@ -169,7 +109,7 @@ class EntityContainer
      * an entity set in the parent container has the same name as an entity set in the
      * child container, only the entity set in the child container will be returned.
      * 
-     * @return array An array container all entity sets in the entity containers.
+     * @return EntitySet[] An array container all entity sets in the entity containers.
      */
     public function getEntitySets()
     {
@@ -210,6 +150,8 @@ class EntityContainer
      * @throws InvalidArgumentException Thrown if an entity set is added with a name that
      *                                  is already in use by another entity set in the same
      *                                  entity container.
+     *                                  Thrown if either association set ends link an entity
+     *                                  set that is not contained in this same container.
      */
     public function addAssociationSet(AssociationSet $associationSet)
     {
@@ -223,7 +165,7 @@ class EntityContainer
         foreach ($associationSet->getSetEnds() as $setEnd) {
             if (null === $this->getEntitySetByName($setEnd->getEntitySet()->getName())) {
                 throw new InvalidArgumentException(sprintf(
-                    'The entity set end in the association set must point to entity sets in this container or ' .
+                    'The entity set ends in the association set must point to entity sets in this container or ' .
                     'in the container\'s parent container.',
                     $associationSet->getName()
                 ));
@@ -244,7 +186,7 @@ class EntityContainer
      * in the child container, only the assocation set in the child container will be
      * returned.
      * 
-     * @return array An array container all entity sets in the entity containers.
+     * @return AssociationSet[] An array container all entity sets in the entity containers.
      */
     public function getAssociationSets()
     {

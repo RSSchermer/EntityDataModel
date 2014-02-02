@@ -11,9 +11,15 @@
 
 namespace Rolab\EntityDataModel\Type;
 
+use Rolab\EntityDataModel\NamedModelConstruct;
 use Rolab\EntityDataModel\Type\ResourceType;
 
-abstract class PrimitiveType extends ResourceType
+/**
+ * Represents a primitive data type. A primitive type is atomic and
+ * cannot be decomposed in to smaller types.
+ * 
+ * @author Roland Schermer <roland0507@gmail.com>
+ */
+abstract class PrimitiveType extends NamedModelConstruct implements ResourceType
 {
-
 }

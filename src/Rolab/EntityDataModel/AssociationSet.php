@@ -11,9 +11,9 @@
 
 namespace Rolab\EntityDataModel;
 
+use Rolab\EntityDataModel\NamedContainerElement;
 use Rolab\EntityDataModel\Association;
 use Rolab\EntityDataModel\AssociationSetEnd;
-use Rolab\EntityDataModel\EntityContainer;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
@@ -25,13 +25,8 @@ use Rolab\EntityDataModel\Exception\InvalidArgumentException;
  * 
  * @author Roland Schermer <roland0507@gmail.com>
  */
-class AssociationSet
+class AssociationSet extends NamedContainerElement
 {
-    /**
-     * @var string
-     */
-    private $name;
-
     /**
      * @var Association
      */
@@ -48,11 +43,6 @@ class AssociationSet
     private $setEndTwo;
 
     /**
-     * @var EntityContainer
-     */
-    private $entityContainer;
-    
-    /**
      * Creates a new association set.
      * 
      * @param string                 $name        The name of the entity container (must
@@ -67,51 +57,13 @@ class AssociationSet
     public function __construct($name, Association $association, AssociationSetEnd $setEndOne = null,
         AssociationSetEnd $setEndTwo = null
     ) {
-        if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
-            throw new InvalidArgumentException(sprintf('"%s" is an illegal name for an association set. The name for ' .
-                'an association set may only contain alphanumeric characters and underscores.', $name));
-        }
-
-        $this->name = $name;
+        parent::__construct($name);
+        
         $this->association = $association;
         $this->setEndOne = $setEndOne;
         $this->setEndTwo = $setEndTwo;
     }
     
-    /**
-     * Sets the entity container the association set is contained in.
-     * 
-     * Sets the entity container the association set is contained in. An association set should
-     * always be part of some entity container.
-     * 
-     * @param EntityContainer $entityContainer The entity container the association set is a part of.
-     */
-    public function setEntityContainer(EntityContainer $entityContainer)
-    {
-        $this->entityContainer = $entityContainer;
-    }
-    
-    /**
-     * Returns the entity container the association set is contained in.
-     * 
-     * @return null|EntityContainer The entity container the association set is contained in or null if
-     *                              no entity container was set.
-     */
-    public function getEntityContainer()
-    {
-        return $this->entityContainer;
-    }
-    
-    /**
-     * Returns the name of the association set.
-     * 
-     * @return string The name of the association set.
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
     /**
      * Returns the association the association set represents.
      * 
@@ -125,7 +77,7 @@ class AssociationSet
     /**
      * Returns the set ends of the association set.
      * 
-     * @return array An array containing the set ends.
+     * @return AssociationSetEnd[] An array containing the set ends.
      */
     public function getSetEnds()
     {

@@ -46,7 +46,7 @@ class NavigationPropertyDescriptionTest extends EntityDataModelTestCase
         $navigationPropertyDescription = new NavigationPropertyDescription('NavigationProperty',
             $this->propertyReflectionFixture, $associationFixture, 'RoleOne', 'RoleTwo');
 
-        $this->assertSame($associationFixture, $navigationPropertyDescription->getAssocation());
+        $this->assertSame($associationFixture, $navigationPropertyDescription->getAssociation());
         $this->assertEquals('RoleOne', $navigationPropertyDescription->getFromRole());
         $this->assertEquals('RoleTwo', $navigationPropertyDescription->getToRole());
     }

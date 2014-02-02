@@ -12,15 +12,40 @@
 namespace Rolab\EntityDataModel\Type;
 
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
+use Rolab\EntityDataModel\Type\ComplexType;
 
+/**
+ * Describes a property of a complex type.
+ * 
+ * @author Roland Schermer <roland0507@gmail.com>
+ */
 abstract class ResourcePropertyDescription
 {
+    /**
+     * @var string
+     */
     private $name;
-
+    
+    /**
+     * @var ReflectionProperty
+     */
     private $reflection;
-
-    private $propertyPossessingStructuralType;
-
+    
+    /**
+     * @var ComplexType
+     */
+    private $complexType;
+    
+    /**
+     * Creates a new resource property description.
+     * 
+     * @param string             $name       The name of the resource property description (may
+     *                                       only consist of alphanumeric characters and the
+     *                                       underscore).
+     * @param ReflectionProperty $reflection A reflection object for the property being described.
+     * 
+     * @throws InvalidArgumentException Thrown if the name contains illegal characters.
+     */
     public function __construct($name, \ReflectionProperty $reflection)
     {
         if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
@@ -34,22 +59,45 @@ abstract class ResourcePropertyDescription
         $this->name = $name;
         $this->reflection = $reflection;
     }
-
-    public function setPropertyPossessingStructuralType(StructuralType $propertyPossessingStructuralType)
+    
+    /**
+     * Sets the complex type this resource property description belongs to.
+     * 
+     * @param ComplexType $complexType The complex type this resource property description
+     *                                 belongs to.
+     */
+    public function setComplexType(ComplexType $complexType)
     {
-        $this->propertyPossessingStructuralType = $propertyPossessingStructuralType;
+        $this->complexType = $complexType;
     }
-
-    public function getPropertyPossessingStructuralType()
+    
+    /**
+     * Returns the complex type this resource property description belongs to.
+     * 
+     * @return null|ComplexType The complex type this resource property description belongs to.
+     */
+    public function getComplexType()
     {
-        return $this->propertyPossessingStructuralType;
+        return $this->complexType;
     }
-
+    
+    /**
+     * Returns the name of the resource property description.
+     * 
+     * @return string The name of the resource property description.
+     */
     public function getName()
     {
         return $this->name;
     }
-
+    
+    /**
+     * Returns the reflection for the property that is described by the resource
+     * property description.
+     * 
+     * @return ReflectionProperty The reflection for the property that is described by
+     *                            the resource property description.
+     */
     public function getReflection()
     {
         return $this->reflection;

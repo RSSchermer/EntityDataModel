@@ -11,61 +11,63 @@
 
 namespace Rolab\EntityDataModel\Type;
 
-use Rolab\EntityDataModel\EntityDataModel;
+use Rolab\EntityDataModel\NamedModelElement;
 use Rolab\EntityDataModel\Type\ResourceType;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
-abstract class StructuralType extends ResourceType
-{
-    private $name;
-
+/**
+ * Represents a structural data type. A structural type is not atomic,
+ * it is build from other types. Maps to a class definition.
+ * 
+ * @author Roland Schermer <roland0507@gmail.com>
+ */
+abstract class StructuralType extends NamedModelElement implements ResourceType
+{    
+    /**
+     * @var ReflectionClass
+     */
     private $reflection;
-
+    
+    /**
+     * @var EntityDataModel
+     */
     private $entityDataModel;
-
+    
+    /**
+     * Creates a new structural type.
+     * 
+     * @param string          $name       The name of the structural type (may only
+     *                                    consist of alphanumeric characters and the
+     *                                    underscore).
+     * @param ReflectionClass $reflection Reflection of the class this structural type
+     *                                    maps to.
+     * 
+     * @throws InvalidArgumentException Thrown if the name contains illegal characters.
+     */
     public function __construct($name, \ReflectionClass $reflection)
     {
-        if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
-            throw new InvalidArgumentException(sprintf('"%s" is an illegal name for a structural type. The name for ' .
-                'a structural type may only contain alphanumeric characters and underscores.', $name));
-        }
-
-        $this->name = $name;
+        parent::__construct($name);
+        
         $this->reflection = $reflection;
     }
-
-    public function setEntityDataModel(EntityDataModel $entityDataModel)
-    {
-        $this->entityDataModel = $entityDataModel;
-    }
-
-    public function getEntityDataModel()
-    {
-        return $this->entityDataModel;
-    }
-
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    public function getNamespace()
-    {
-        return isset($this->entityDataModel) ? $this->entityDataModel->getNamespace() : null;
-    }
-
+    
+    /**
+     * Returns the reflection of the class this structural type maps to.
+     * 
+     * @return ReflectionClass A reflection of the class this structural type maps to.
+     */
     public function getReflection()
     {
         return $this->reflection;
     }
-
+    
+    /**
+     * Returns the name of the class this structural type maps to.
+     * 
+     * @return string The name of the class this structural type maps to.
+     */
     public function getClassName()
     {
         return $this->reflection->getName();
-    }
-
-    public function getFullName()
-    {
-        return isset($this->entityDataModel) ? $this->entityDataModel->getNamespace() .'.'. $this->name : $this->name;
     }
 }

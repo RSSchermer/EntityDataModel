@@ -66,8 +66,9 @@ class AssociationEnd
         if (!in_array($multiplicity,
             array(self::MULTIPLICITY_ZERO_OR_ONE, self::MULTIPLICITY_EXACTLY_ONE, self::MULTIPLICITY_MANY)
         )) {
-            throw new InvalidArgumentException(sprintf('"%s" is an illegal value for multiplicity.',
-                $multiplicity));
+            throw new InvalidArgumentException(sprintf('"%s" is an illegal value for multiplicity. Valid values are ' .
+                '%s for zero or one, %s for exactly 1 and %s for many.', $multiplicity, self::MULTIPLICITY_ZERO_OR_ONE,
+                self::MULTIPLICITY_EXACTLY_ONE, self::MULTIPLICITY_MANY));
         }
 
         $this->multiplicity = $multiplicity;

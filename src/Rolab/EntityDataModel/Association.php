@@ -11,6 +11,7 @@
 
 namespace Rolab\EntityDataModel;
 
+use Rolab\EntityDataModel\NamedModelElement;
 use Rolab\EntityDataModel\AssociationEnd;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
@@ -19,16 +20,11 @@ use Rolab\EntityDataModel\Exception\InvalidArgumentException;
  * 
  * @author Roland Schermer <roland0507@gmail.com>
  */
-class Association
+class Association extends NamedModelElement
 {
     const DELETE_ACTION_NONE = 0;
     
     const DELETE_ACTION_CASCADE = 1;
-    
-    /**
-     * @var string
-     */
-    private $name;
     
     /**
      * @var AssociationEnd
@@ -44,11 +40,6 @@ class Association
      * @var integer
      */
     private $onDeleteAction;
-    
-    /**
-     * @var EntityDataModel
-     */
-    private $entityDataModel;
     
     /**
      * Creates a new association.
@@ -68,77 +59,26 @@ class Association
     public function __construct($name, AssociationEnd $endOne, AssociationEnd $endTwo,
         $onDeleteAction = self::DELETE_ACTION_NONE
     ) {
-        if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
-            throw new InvalidArgumentException(sprintf('"%s" is an illegal name for an association. The name for ' .
-                'an association may only contain alphanumeric characters and underscores.', $name));
-        }
-
-        $this->name = $name;
+        parent::__construct($name);
+        
         $this->endOne = $endOne;
         $this->endTwo = $endTwo;
 
         if ($onDeleteAction !== self::DELETE_ACTION_NONE && $onDeleteAction !== self::DELETE_ACTION_CASCADE) {
             throw new InvalidArgumentException(sprintf(
-                '"%s" is an illegal value for the "on delete" action.',
-                $onDeleteAction
+                '"%s" is an illegal value for the "on delete" action. Valid values are %s for no delete action ' .
+                'and %s for cascading the delete.',
+                $onDeleteAction, self::DELETE_ACTION_NONE, self::DELETE_ACTION_CASCADE
             ));
         }
          
         $this->onDeleteAction = $onDeleteAction;
     }
-    
-    /**
-     * Sets the entity data model the association is a part of.
-     * 
-     * Sets the entity data model the association is a part of. An association should
-     * always be part of some entity data model.
-     * 
-     * @param EntityDataModel $entityDataModel The entity data model the association is
-     *                                         a part of.
-     */
-    public function setEntityDataModel(EntityDataModel $entityDataModel)
-    {
-        $this->entityDataModel = $entityDataModel;
-    }
-    
-    /**
-     * Returns the entity data model the association is a part of.
-     * 
-     * @return null|EntityDataModel The entity data model the association is a part of
-     *                              or null if no entity data model is assigned yet.
-     */
-    public function getEntityDataModel()
-    {
-        return $this->entityDataModel;
-    }
-    
-    /**
-     * Returns the name of the association without namespace prefix.
-     *
-     * @return string The name of the association.
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-    
-    /**
-     * Returns the full name of the association with namespace prefix.
-     * 
-     * Returns the name of the association with namespace prefix if an entity data
-     * model was set or the name without a prefix if no entity data model was set.
-     *
-     * @return string The full name of the association.
-     */
-    public function getFullName()
-    {
-        return isset($this->entityDataModel) ? $this->entityDataModel->getNamespace() .'.'. $this->name : $this->name;
-    }
-    
+
     /**
      * Returns both association ends.
      * 
-     * @return array Both association ends.
+     * @return AssociationEnd[] Both association ends.
      */
     public function getEnds()
     {

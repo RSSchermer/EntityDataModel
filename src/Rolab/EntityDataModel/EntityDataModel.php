@@ -41,27 +41,27 @@ class EntityDataModel
     private $namespaceAlias;
 
     /**
-     * @var array
+     * @var EntityDataModel[]
      */
     private $referencedModels = array();
 
     /**
-     * @var array
+     * @var StructuralType[]
      */
     private $structuralTypes = array();
 
     /**
-     * @var array
+     * @var StructuralType[]
      */
     private $structuralTypesByClassName = array();
 
     /**
-     * @var array
+     * @var Association[]
      */
     private $associations = array();
 
     /**
-     * @var array
+     * @var EntityContainer[]
      */
     private $entityContainers = array();
 
@@ -209,7 +209,7 @@ class EntityDataModel
     /**
      * Returns the entity data models referenced by the current entity data model.
      *
-     * @return array An array of the entity data models referenced by the entity data model.
+     * @return EntityDataModel[] An array of the entity data models referenced by the entity data model.
      */
     public function getReferencedModels()
     {
@@ -275,7 +275,7 @@ class EntityDataModel
      * will not return any structural types contained in the referenced entity data
      * models.
      *
-     * @return array An array of the structural types contained in the entity data model.
+     * @return StructuralType[] An array of the structural types contained in the entity data model.
      */
     public function getStructuralTypes()
     {
@@ -360,7 +360,7 @@ class EntityDataModel
      * Returns all associations contained in the entity data model, but will not return
      * the associations contained in any of the referenced entity data models.
      *
-     * @return array An array of the associations contained in the entity data model.
+     * @return Association[] An array of the associations contained in the entity data model.
      */
     public function getAssociations()
     {
@@ -430,7 +430,8 @@ class EntityDataModel
      * Returns all entity containers contained in the entity data model, but will not return
      * the entity containers contained in any of the referenced entity data models.
      *
-     * @return array An array of the entity containers contained in the entity data model.
+     * @return EntityContainer[] An array of the entity containers contained in the entity
+     *                           data model.
      */
     public function getEntityContainers()
     {

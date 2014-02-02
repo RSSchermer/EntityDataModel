@@ -15,6 +15,10 @@ use Rolab\EntityDataModel\Type\PrimitiveType;
 
 abstract class EdmPrimitiveType extends PrimitiveType
 {
+    public function __construct()
+    {
+    }
+    
     public function getNamespace()
     {
         return 'Edm';

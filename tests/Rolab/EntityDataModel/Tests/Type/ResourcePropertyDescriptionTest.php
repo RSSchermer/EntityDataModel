@@ -56,14 +56,14 @@ class ResourcePropertyDescriptionTest extends EntityDataModelTestCase
     /**
      * @depends testConstructor
      */
-    public function testSetPropertyPossessingStructuralType(ResourcePropertyDescription $resourcePropertyDescription)
+    public function testSetComplexType(ResourcePropertyDescription $resourcePropertyDescription)
     {
-        $structuralTypeStub = $this->getMockBuilder('Rolab\EntityDataModel\Type\StructuralType')
+        $complexTypeStub = $this->getMockBuilder('Rolab\EntityDataModel\Type\ComplexType')
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
 
-        $resourcePropertyDescription->setPropertyPossessingStructuralType($structuralTypeStub);
+        $resourcePropertyDescription->setComplexType($complexTypeStub);
 
-        $this->assertSame($structuralTypeStub, $resourcePropertyDescription->getPropertyPossessingStructuralType());
+        $this->assertSame($complexTypeStub, $resourcePropertyDescription->getComplexType());
     }
 }

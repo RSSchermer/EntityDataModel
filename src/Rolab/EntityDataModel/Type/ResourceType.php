@@ -11,11 +11,11 @@
 
 namespace Rolab\EntityDataModel\Type;
 
-abstract class ResourceType
+/**
+ * Represents a named resource type definition.
+ * 
+ * @author Roland Schermer <roland0507@gmail.com>
+ */
+interface ResourceType
 {
-    abstract public function getName();
-
-    abstract public function getNamespace();
-
-    abstract public function getFullName();
 }

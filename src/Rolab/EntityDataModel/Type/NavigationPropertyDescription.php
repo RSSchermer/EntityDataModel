@@ -14,14 +14,40 @@ namespace Rolab\EntityDataModel\Type;
 use Rolab\EntityDataModel\Type\ResourcePropertyDescription;
 use Rolab\EntityDataModel\Association;
 
+/**
+ * Describes a navigation property of an entity type.
+ * 
+ * @author Roland Schermer <roland0507@gmail.com>
+ */
 class NavigationPropertyDescription extends ResourcePropertyDescription
 {
+    /**
+     * @param Association
+     */
     private $association;
-
+    
+    /**
+     * @param string
+     */
     private $toRole;
-
+    
+    /**
+     * @param string
+     */
     private $fromRole;
-
+    
+    /**
+     * Creates a new navigation property description.
+     * 
+     * @param string             $name        The name of the navigation property description.
+     * @param ReflectionProperty $reflection  Reflection of the property described.
+     * @param Association        $accociation The association describing the navigation relation.
+     * @param string             $fromRole    The name of the 'from' role in the association.
+     * @param string             $toRole      The name of the 'to' role in the association.
+     * 
+     * @throws InvalidArgumentException Thrown if no role exists on the association with the 'from' role name.
+     *                                  Thrown if no role exists on the association with the 'to' role name.
+     */
     public function __construct($name, \ReflectionProperty $reflection, Association $association, $fromRole, $toRole)
     {
         parent::__construct($name, $reflection);
@@ -42,17 +68,32 @@ class NavigationPropertyDescription extends ResourcePropertyDescription
 
         $this->toRole = $toRole;
     }
-
-    public function getAssocation()
+    
+    /**
+     * Returns the association that describes the navigation relation.
+     * 
+     * @return Association The association that describes the navigation relation.
+     */
+    public function getAssociation()
     {
         return $this->association;
     }
-
+    
+    /**
+     * Returns the name of the 'from' role.
+     * 
+     * @return string The name of the 'from' role.
+     */
     public function getFromRole()
     {
         return $this->fromRole;
     }
-
+    
+    /**
+     * Returns the name of the 'to' role.
+     * 
+     * @return string The name of the 'to' role.
+     */
     public function getToRole()
     {
         return $this->toRole;

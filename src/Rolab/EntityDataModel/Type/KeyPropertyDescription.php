@@ -14,10 +14,27 @@ namespace Rolab\EntityDataModel\Type;
 use Rolab\EntityDataModel\Type\PrimitiveType;
 use Rolab\EntityDataModel\Type\PrimitivePropertyDescription;
 
+/**
+ * Describes a key property of an entity type.
+ * 
+ * @author Roland Schermer <roland0507@gmail.com>
+ */
 class KeyPropertyDescription extends PrimitivePropertyDescription
 {
-    public function __construct($name, \ReflectionProperty $reflection, PrimitiveType $type)
+    /**
+     * Creates a new key property description.
+     * 
+     * @param string             $name              The name of the key property description. (may
+     *                                              only consist of alphanumeric characters and the
+     *                                              underscore).
+     * @param ReflectionProperty $reflection        A reflection object for the property being described.
+     * @param ComplexType        $propertyType      The type of the property value.
+     * @param boolean            $isCollection      Whether or not the property value is a collection.
+     * 
+     * @throws InvalidArgumentException Thrown if the name contains illegal characters.
+     */
+    public function __construct($name, \ReflectionProperty $reflection, PrimitiveType $propertyType)
     {
-        parent::__construct($name, $reflection, $type, false);
+        parent::__construct($name, $reflection, $propertyType, false);
     }
 }
