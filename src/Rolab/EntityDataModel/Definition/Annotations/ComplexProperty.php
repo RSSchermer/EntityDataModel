@@ -17,4 +17,6 @@ namespace Rolab\EntityDataModel\Annotations;
  */
 class ComplexProperty extends StructuralProperty
 {
+    /** @var string */
+    public $className;
 }

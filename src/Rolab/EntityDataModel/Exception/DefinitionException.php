@@ -9,14 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Rolab\EntityDataModel\Annotations;
+namespace Rolab\EntityDataModel\Exception;
 
-use Doctrine\Common\Annotations\Annotation;
+use Rolab\EntityDataModel\Exception\ExceptionInterface;
 
-/**
- * @Annotation
- * @Target("CLASS")
- */
-class TypeNamespace extends Annotation
+class DefinitionException extends \RuntimeException implements ExceptionInterface
 {
 }

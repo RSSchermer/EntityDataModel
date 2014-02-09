@@ -2,24 +2,28 @@
 
 namespace Rolab\EntityDataModel\Definition\Builder;
 
+use Metadata\MetadataFactory;
+
 use Rolab\EntityDataModel\Definition\StructuralTypeDefinitionFactory;
 
 class EntityDataModelBuilder
 {
-    private $structuralTypeDefinitionFactory;
+    /**
+     * @var StructuralTypeDefinitionFactory
+     */
+    private $metadataFactory;
 
     private $autoLoadMissingReferences;
 
     private $baseEntityDataModel;
 
-    private $structuralTypeDefinitions = array();
+    private $structuralTypeMetadata = array();
 
     private $entityContainerDefinitions = array();
 
-    public function __construct(StructuralTypeDefinitionFactory $structuralTypeDefinitionFactory,
-        $autoLoadMissingReferences = true
-    ) {
-        $this->structuralTypeDefinitionFactory = $structuralTypeDefinitionFactory;
+    public function __construct(MetadataFactory $metadataFactory, $autoLoadMissingReferences = true)
+    {
+        $this->metadataFactory = $metadataFactory;
         $this->autoLoadMissingReferences = $autoLoadMissingReferences;
     }
 
@@ -28,19 +32,21 @@ class EntityDataModelBuilder
         $this->baseEntityDataModel = $baseEntityDataModel;
     }
 
-    public function addStructuralTypeDefinition(StructuralTypeDefinition $structuralTypeDefinition)
+    public function addStructuralTypeMetadata(StructuralTypeMetadata $structuralTypeMetadata)
     {
-
+        $this->structuralTypeDefinitions[$structuralTypeMetadata->name] = $structuralTypeDefinition;
     }
 
-    public function addStructuralTypeDefinitionForClass($className)
+    public function addStructuralTypeMetadataForClass($className)
     {
-
+        if ($metadata = $this->metadataFactory->getMetadataForClass($className)) {
+            $this->structuralTypeDefinitions[$metadata->name] = $metadata;
+        }
     }
 
     public function addEntityContainerDefinition(EntityContainerDefinition $entityContainerDefinition)
     {
-
+        
     }
 
     public function buildEntityDataModel()

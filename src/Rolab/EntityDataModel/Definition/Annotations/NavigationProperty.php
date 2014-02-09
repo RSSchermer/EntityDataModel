@@ -11,10 +11,29 @@
 
 namespace Rolab\EntityDataModel\Annotations;
 
+use Doctrine\Common\Annotations\Annotation;
+
 /**
  * @Annotation
  * @Target("PROPERTY")
  */
-class NavigationProperty extends StructuralProperty
+class NavigationProperty extends Annotation
 {
+    /** @var string */
+    public $name;
+    
+    /** @var string */
+    public $role;
+    
+    /** @var string */
+    public $targetEntity;
+    
+    /** @var string */
+    public $targetRole;
+    
+    /** @var string */
+    public $multiplicity = '0..1';
+    
+    /** @var string */
+    public $deleteAction = 'none';
 }

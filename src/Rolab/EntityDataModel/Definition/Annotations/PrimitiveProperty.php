@@ -15,8 +15,8 @@ namespace Rolab\EntityDataModel\Annotations;
  * @Annotation
  * @Target("PROPERTY")
  */
-class PrimitiveProperty extends BasePrimitiveProperty
+class PrimitiveProperty extends StructuralProperty
 {
-    /** @var boolean */
-    public $isCollection = false;
+    /** @var string */
+    public $type;
 }

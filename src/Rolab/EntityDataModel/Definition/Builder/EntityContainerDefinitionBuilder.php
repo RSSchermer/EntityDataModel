@@ -2,7 +2,7 @@
 
 namespace Rolab\EntityDataModel\Definition\Builder;
 
-class ContainerDefinitionBuilder
+class EntityContainerDefinitionBuilder
 {
 
 }

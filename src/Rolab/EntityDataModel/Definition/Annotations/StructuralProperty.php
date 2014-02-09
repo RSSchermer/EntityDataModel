@@ -11,15 +11,16 @@
 
 namespace Rolab\EntityDataModel\Annotations;
 
-/**
- * @Annotation
- * @Target("PROPERTY")
- */
-abstract class StructuralProperty
+use Doctrine\Common\Annotations\Annotation;
+
+abstract class StructuralProperty extends Annotation
 {
     /** @var string */
-    public $targetClass;
-
+    public $name;
+    
     /** @var boolean */
-    public $isCollection = false;
+    public $nullable;
+    
+    /** @var boolean */
+    public $isCollection;
 }

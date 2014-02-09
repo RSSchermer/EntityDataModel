@@ -9,14 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Rolab\EntityDataModel\Annotations;
+namespace Rolab\EntityDataModel\Definition;
 
-use Doctrine\Common\Annotations\Annotation;
+use Rolab\EntityDataModel\Definition\StructuralTypeMetadata;
 
-/**
- * @Annotation
- * @Target("CLASS")
- */
-class SetName extends Annotation
+class ComplexTypeMetadata extends StructuralTypeMetadata
 {
 }

@@ -22,17 +22,17 @@ use Rolab\EntityDataModel\Association;
 class NavigationPropertyDescription extends ResourcePropertyDescription
 {
     /**
-     * @param Association
+     * @var Association
      */
     private $association;
     
     /**
-     * @param string
+     * @var string
      */
     private $toRole;
     
     /**
-     * @param string
+     * @var string
      */
     private $fromRole;
     

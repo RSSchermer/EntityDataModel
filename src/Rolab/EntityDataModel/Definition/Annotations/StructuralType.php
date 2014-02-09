@@ -11,10 +11,10 @@
 
 namespace Rolab\EntityDataModel\Annotations;
 
-/**
- * @Annotation
- * @Target("PROPERTY")
- */
-class ETagProperty extends BasePrimitiveProperty
+use Doctrine\Common\Annotations\Annotation;
+
+abstract class StructuralType extends Annotation
 {
+    /** @var string */
+    public $name;
 }

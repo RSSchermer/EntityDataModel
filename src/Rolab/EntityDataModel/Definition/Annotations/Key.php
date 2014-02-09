@@ -11,10 +11,12 @@
 
 namespace Rolab\EntityDataModel\Annotations;
 
+use Doctrine\Common\Annotations\Annotation;
+
 /**
  * @Annotation
  * @Target("PROPERTY")
  */
-class KeyProperty extends BasePrimitiveProperty
+class Key extends Annotation
 {
 }

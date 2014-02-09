@@ -17,6 +17,6 @@ use Doctrine\Common\Annotations\Annotation;
  * @Annotation
  * @Target("CLASS")
  */
-class TypeName extends Annotation
+class ComplexType extends StructuralType
 {
 }
