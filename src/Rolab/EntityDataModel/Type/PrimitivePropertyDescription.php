@@ -33,8 +33,9 @@ class PrimitivePropertyDescription extends StructuralPropertyDescription
      * 
      * @throws InvalidArgumentException Thrown if the name contains illegal characters.
      */
-    public function __construct($name, \ReflectionProperty $reflection, PrimitiveType $propertyType, $isCollection = false)
-    {
+    public function __construct($name, \ReflectionProperty $reflection, PrimitiveType $propertyType,
+        $isCollection = false
+    ) {
         parent::__construct($name, $reflection, $propertyType, $isCollection);
     }
 }

@@ -41,7 +41,7 @@ class NavigationPropertyDescription extends ResourcePropertyDescription
      * 
      * @param string             $name        The name of the navigation property description.
      * @param ReflectionProperty $reflection  Reflection of the property described.
-     * @param Association        $accociation The association describing the navigation relation.
+     * @param Association        $association The association describing the navigation relation.
      * @param string             $fromRole    The name of the 'from' role in the association.
      * @param string             $toRole      The name of the 'to' role in the association.
      * 

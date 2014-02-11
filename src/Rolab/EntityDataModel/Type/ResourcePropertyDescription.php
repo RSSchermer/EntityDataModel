@@ -52,8 +52,7 @@ abstract class ResourcePropertyDescription
             throw new InvalidArgumentException(sprintf(
                 '"%s" is an illegal name for a property description. ' .
                 'The name for a property descriptions may only contain alphanumeric characters and underscores.',
-                $name
-            ));
+                $name));
         }
 
         $this->name = $name;
