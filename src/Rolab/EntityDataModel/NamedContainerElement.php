@@ -43,8 +43,11 @@ abstract class NamedContainerElement
     public function __construct($name)
     {
         if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
-            throw new InvalidArgumentException(sprintf('"%s" is an illegal name for a container element. The ' .
-                'name for a container element may only contain alphanumeric characters and underscores.', $name));
+            throw new InvalidArgumentException(sprintf(
+                '"%s" is an illegal name for a container element. The name for a container element may only contain ' .
+                'alphanumeric characters and underscores.',
+                $name
+            ));
         }
         
         $this->name = $name;

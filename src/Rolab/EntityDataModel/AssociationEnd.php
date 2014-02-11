@@ -56,19 +56,30 @@ class AssociationEnd
     public function __construct($role, EntityType $entityType, $multiplicity = self::MULTIPLICITY_ZERO_OR_ONE)
     {
         if (!preg_match('/^[A-Za-z0-9_]+$/', $role)) {
-            throw new InvalidArgumentException(sprintf('"%s" is an illegal role for an association. The role for ' .
-                'an association may only contain alphanumeric characters and underscores.', $role));
+            throw new InvalidArgumentException(
+                sprintf(
+                    '"%s" is an illegal role for an association. The role for an association may only contain ' .
+                    'alphanumeric characters and underscores.',
+                    $role
+                )
+            );
         }
         
         $this->role = $role;
         $this->entityType = $entityType;
 
-        if (!in_array($multiplicity,
+        if (!in_array(
+            $multiplicity,
             array(self::MULTIPLICITY_ZERO_OR_ONE, self::MULTIPLICITY_EXACTLY_ONE, self::MULTIPLICITY_MANY)
         )) {
-            throw new InvalidArgumentException(sprintf('"%s" is an illegal value for multiplicity. Valid values are ' .
-                '%s for zero or one, %s for exactly 1 and %s for many.', $multiplicity, self::MULTIPLICITY_ZERO_OR_ONE,
-                self::MULTIPLICITY_EXACTLY_ONE, self::MULTIPLICITY_MANY));
+            throw new InvalidArgumentException(sprintf(
+                '"%s" is an illegal value for multiplicity. Valid values are %s for zero or one, %s for exactly 1 ' .
+                'and %s for many.',
+                $multiplicity,
+                self::MULTIPLICITY_ZERO_OR_ONE,
+                self::MULTIPLICITY_EXACTLY_ONE,
+                self::MULTIPLICITY_MANY
+            ));
         }
 
         $this->multiplicity = $multiplicity;

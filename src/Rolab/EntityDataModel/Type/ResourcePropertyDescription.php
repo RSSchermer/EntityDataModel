@@ -50,9 +50,10 @@ abstract class ResourcePropertyDescription
     {
         if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
             throw new InvalidArgumentException(sprintf(
-                '"%s" is an illegal name for a property description. ' .
-                'The name for a property descriptions may only contain alphanumeric characters and underscores.',
-                $name));
+                '"%s" is an illegal name for a property description. The name for a property descriptions may only ' .
+                'contain alphanumeric characters and underscores.',
+                $name
+            ));
         }
 
         $this->name = $name;

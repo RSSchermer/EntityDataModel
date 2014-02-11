@@ -75,19 +75,25 @@ class EntityType extends ComplexType
      *                                  Thrown if the property description list is empty.
      * 
      */
-    public function __construct($name, \ReflectionClass $reflection, array $propertyDescriptions,
-        EntityType $baseType = null, $isAbstract = false
+    public function __construct(
+        $name,
+        \ReflectionClass $reflection,
+        array $propertyDescriptions,
+        EntityType $baseType = null,
+        $isAbstract = false
     ) {
         parent::__construct($name, $reflection, $propertyDescriptions);
 
         if (empty($this->keyPropertyDescriptions) && null === $baseType) {
             throw new InvalidArgumentException(sprintf(
-                'Entity type "%s" must be given either atleast one KeyPropertyDescription or ' .
-                'a base entity type.', $this->getFullName()));
+                'Entity type "%s" must be given either atleast one KeyPropertyDescription or a base entity type.',
+                $this->getFullName()
+            ));
         } elseif (count($this->keyPropertyDescriptions) > 0 && null !== $baseType) {
             throw new InvalidArgumentException(sprintf(
                 'Entity type "%s" may be given either a base entity type or one or more KeyPropertyDescriptions, ' .
-                'but it may not be given both a base type and KeyPropertyDescriptions.', $this->getFullName()
+                'but it may not be given both a base type and KeyPropertyDescriptions.',
+                $this->getFullName()
             ));
         }
 
@@ -124,14 +130,18 @@ class EntityType extends ComplexType
         $propertyDescriptions = $this->getPropertyDescriptions();
 
         if (isset($propertyDescriptions[$propertyDescription->getName()])) {
-            throw new InvalidArgumentException(sprintf('Type "%s" already has a property named "%s"',
-                $this->getFullName(), $propertyDescription->getName()));
+            throw new InvalidArgumentException(sprintf(
+                'Type "%s" already has a property named "%s"',
+                $this->getFullName(),
+                $propertyDescription->getName()
+            ));
         }
 
         if ($this->constructionCompleted && $propertyDescription instanceof KeyPropertyDescription) {
             throw new InvalidArgumentException(sprintf(
                 'Cannot add key properties after the initial construction of the entity type.',
-                $this->getFullName(), $propertyDescription->getName()
+                $this->getFullName(),
+                $propertyDescription->getName()
             ));
         }
 
@@ -204,10 +214,12 @@ class EntityType extends ComplexType
      */
     public function getStructuralPropertyDescriptions()
     {
-        return isset($this->baseType) ? array_merge(
+        return isset($this->baseType) ?
+            array_merge(
                 $this->baseType->getStructuralPropertyDescriptions(),
                 parent::getStructuralPropertyDescriptions()
-            ) : parent::getStructuralPropertyDescriptions();
+            ) :
+            parent::getStructuralPropertyDescriptions();
     }
     
     /**

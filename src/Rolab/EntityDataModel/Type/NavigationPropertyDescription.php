@@ -55,15 +55,21 @@ class NavigationPropertyDescription extends ResourcePropertyDescription
         $this->association = $association;
 
         if (is_null($association->getEndByRole($fromRole))) {
-            throw new InvalidArgumentException(sprintf('Role "%s" could not be found in the association. The "from" role must' .
-                'reference a role name of an association end in the association.', $fromRole));
+            throw new InvalidArgumentException(sprintf(
+                'Role "%s" could not be found in the association. The "from" role must reference a role name of ' .
+                'an association end in the association.',
+                $fromRole
+            ));
         }
 
         $this->fromRole = $fromRole;
 
         if (is_null($association->getEndByRole($toRole))) {
-            throw new InvalidArgumentException(sprintf('Role "%s" could not be found in the association. The "to" role must' .
-                'reference a role name of an association end in the association.', $toRole));
+            throw new InvalidArgumentException(sprintf(
+                'Role "%s" could not be found in the association. The "to" role must reference a role name of an ' .
+                'association end in the association.',
+                $toRole
+            ));
         }
 
         $this->toRole = $toRole;

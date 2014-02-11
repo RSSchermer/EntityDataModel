@@ -20,7 +20,7 @@ use Rolab\EntityDataModel\EntityDataModel;
  * @author Roland Schermer <roland0507@gmail.com>
  */
 abstract class NamedModelElement extends NamedModelConstruct
-{    
+{
     /**
      * @var EntityDataModel
      */

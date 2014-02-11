@@ -88,9 +88,11 @@ class EntityDataModel
         $this->uri = $uri;
 
         if (!preg_match('/^[A-Za-z0-9_\.]+$/', $realNamespace)) {
-            throw new InvalidArgumentException(sprintf('"%s" is an illegal namespace for an entity data model. ' .
-                'The namespace for an entity data model may only contain alphanumeric characters, underscores and ' .
-                'dots.', $realNamespace));
+            throw new InvalidArgumentException(sprintf(
+                '"%s" is an illegal namespace for an entity data model. The namespace for an entity data model may ' .
+                'only contain alphanumeric characters, underscores and dots.',
+                $realNamespace
+            ));
         }
 
         $this->realNamespace = $realNamespace;
@@ -157,9 +159,11 @@ class EntityDataModel
     public function setNamespaceAlias($namespaceAlias)
     {
         if (null !== $namespaceAlias && !preg_match('/^[A-Za-z0-9_\.]+$/', $namespaceAlias)) {
-            throw new InvalidArgumentException(sprintf('"%s" is an illegal namespace alias for an entity data model. ' .
-                'The namespace alias for an entity data model may only contain alphanumeric characters, ' .
-                'underscores and dots.', $namespaceAlias));
+            throw new InvalidArgumentException(sprintf(
+                '"%s" is an illegal namespace alias for an entity data model. The namespace alias for an entity ' .
+                'data model may only contain alphanumeric characters, underscores and dots.',
+                $namespaceAlias
+            ));
         }
 
         $this->namespaceAlias = $namespaceAlias;
@@ -199,8 +203,11 @@ class EntityDataModel
         $namespace = $referencedModel->getNamespace();
 
         if (isset($this->referencedModels[$namespace]) || $namespace === $this->getNamespace()) {
-            throw new InvalidArgumentException(sprintf('Namespace "%s" is already used by some other referenced ' .
-                'entity data model. Please specify an alias as the second argument.', $namespace));
+            throw new InvalidArgumentException(sprintf(
+                'Namespace "%s" is already used by some other referenced entity data model. Please specify an alias ' .
+                'as the second argument.',
+                $namespace
+            ));
         }
 
         $this->referencedModels[$namespace] = $referencedModel;

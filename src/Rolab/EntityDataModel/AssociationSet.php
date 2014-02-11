@@ -54,7 +54,10 @@ class AssociationSet extends NamedContainerElement
      * @throws InvalidArgumentException Thrown if the name of the association set contains illegal 
      *                                  characters.
      */
-    public function __construct($name, Association $association, AssociationSetEnd $setEndOne = null,
+    public function __construct(
+        $name,
+        Association $association,
+        AssociationSetEnd $setEndOne = null,
         AssociationSetEnd $setEndTwo = null
     ) {
         parent::__construct($name);

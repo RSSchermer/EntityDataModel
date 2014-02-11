@@ -47,8 +47,10 @@ class ComplexType extends StructuralType
         parent::__construct($name, $reflection);
 
         if (count($propertyDescriptions) === 0) {
-            throw new InvalidArgumentException('May not pass an empty array of property descriptions. A complex ' .
-                'type must always have atleast one property.');
+            throw new InvalidArgumentException(
+                'May not pass an empty array of property descriptions. A complex type must always have atleast one ' .
+                'property.'
+            );
         }
 
         foreach ($propertyDescriptions as $propertyDescription) {
@@ -73,8 +75,11 @@ class ComplexType extends StructuralType
         $propertyDescriptions = $this->getPropertyDescriptions();
 
         if (isset($propertyDescriptions[$propertyDescription->getName()])) {
-            throw new InvalidArgumentException(sprintf('Type "%s" already has a property named "%s"',
-                $this->getName(), $propertyDescription->getName()));
+            throw new InvalidArgumentException(sprintf(
+                'Type "%s" already has a property named "%s"',
+                $this->getName(),
+                $propertyDescription->getName()
+            ));
         }
 
         $this->addStructuralPropertyDescription($propertyDescription);

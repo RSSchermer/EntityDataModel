@@ -22,7 +22,7 @@ use Rolab\EntityDataModel\Exception\InvalidArgumentException;
  * @author Roland Schermer <roland0507@gmail.com>
  */
 abstract class StructuralType extends NamedModelElement implements ResourceType
-{    
+{
     /**
      * @var ReflectionClass
      */

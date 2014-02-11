@@ -48,9 +48,12 @@ abstract class StructuralPropertyDescription extends ResourcePropertyDescription
      * 
      * @throws InvalidArgumentException Thrown if the name contains illegal characters.
      */
-    public function __construct($name, \ReflectionProperty $reflection, ResourceType $propertyValueType,
+    public function __construct(
+        $name,
+        \ReflectionProperty $reflection,
+        ResourceType $propertyValueType,
         $isCollection = false
-    ){
+    ) {
         parent::__construct($name, $reflection);
 
         $this->propertyValueType = $propertyValueType;

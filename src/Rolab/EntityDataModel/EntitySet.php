@@ -21,7 +21,7 @@ use Rolab\EntityDataModel\Exception\InvalidArgumentException;
  * @author Roland Schermer <roland0507@gmail.com>
  */
 class EntitySet extends NamedContainerElement
-{    
+{
     /**
      * @var EntityType
      */

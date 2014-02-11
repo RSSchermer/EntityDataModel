@@ -36,8 +36,11 @@ class AnnotationDriver implements DriverInterface
     public function loadMetadataForClass(\ReflectionClass $class)
     {
         if ($this->readClassAnnotation($class, 'ComplexType') && $this->readClassAnnotation($class, 'EntityType')) {
-            throw new DefinitionException(sprintf('Class "%s" can either be marked as a complex type or as an entity ' .
-                'type, but may not be marked as both.', $class->getName()));
+            throw new DefinitionException(sprintf(
+                'Class "%s" can either be marked as a complex type or as an entity type, but may not be marked as ' .
+                'both.',
+                $class->getName()
+            ));
         }
         
         if ($entityTypeAnnotation = $this->readClassAnnotation($class, 'EntityType')) {
@@ -47,28 +50,37 @@ class AnnotationDriver implements DriverInterface
             $entityTypeMetadata->baseType = $entityTypeAnnotation->baseType;
             
             foreach ($class->getProperties() as $property) {
-                if ($this->readPropertyAnnotation($property, 'PrimitiveProperty') 
+                if ($this->readPropertyAnnotation($property, 'PrimitiveProperty')
                     && $this->readPropertyAnnotation($property, 'NavigationProperty')
                 ) {
-                    throw new DefinitionException('Property "%s" on class "%s" was marked as both a primitive and ' .
-                        'a navigation property. A property may not be marked as both a primitive and navigation ' .
-                        'property.', $property->getName(), $class->getName());
+                    throw new DefinitionException(sprintf(
+                        'Property "%s" on class "%s" was marked as both a primitive and a navigation property. A ' .
+                        'property may not be marked as both a primitive and navigation property.',
+                        $property->getName(),
+                        $class->getName()
+                    ));
                 }
                 
-                if ($this->readPropertyAnnotation($property, 'PrimitiveProperty') 
+                if ($this->readPropertyAnnotation($property, 'PrimitiveProperty')
                     && $this->readPropertyAnnotation($property, 'ComplexProperty')
                 ) {
-                    throw new DefinitionException('Property "%s" on class "%s" was marked as both a primitive and ' .
-                        'a complex property. A property may not be marked as both a primitive and complex ' .
-                        'property.', $property->getName(), $class->getName());
+                    throw new DefinitionException(sprintf(
+                        'Property "%s" on class "%s" was marked as both a primitive and a complex property. A ' .
+                        'property may not be marked as both a primitive and complex property.',
+                        $property->getName(),
+                        $class->getName()
+                    ));
                 }
                 
-                if ($this->readPropertyAnnotation($property, 'NavigationProperty') 
+                if ($this->readPropertyAnnotation($property, 'NavigationProperty')
                     && $this->readPropertyAnnotation($property, 'ComplexProperty')
                 ) {
-                    throw new DefinitionException('Property "%s" on class "%s" was marked as both a navigation and ' .
-                        'a complex property. A property may not be marked as both a navigation and complex ' .
-                        'property.', $property->getName(), $class->getName());
+                    throw new DefinitionException(sprintf(
+                        'Property "%s" on class "%s" was marked as both a navigation and a complex property. A ' .
+                        'property may not be marked as both a navigation and complex property.',
+                        $property->getName(),
+                        $class->getName()
+                    ));
                 }
                 
                 if ($annotation = $this->readPropertyAnnotation($property, 'PrimitiveProperty')) {
@@ -87,15 +99,21 @@ class AnnotationDriver implements DriverInterface
                 
                 if ($annotation = $this->readPropertyAnnotation($property, 'ComplexProperty')) {
                     if ($this->readClassAnnotation($property, 'Key')) {
-                        throw new DefinitionException('Property "%s" on class "%s" was marked as both a complex ' .
-                            'property and a key property. A complex property cannot be marked as a key property.',
-                            $property->getName(), $class->getName());
+                        throw new DefinitionException(sprintf(
+                            'Property "%s" on class "%s" was marked as both a complex property and a key property. ' .
+                            'A complex property cannot be marked as a key property.',
+                            $property->getName(),
+                            $class->getName()
+                        ));
                     }
                     
                     if ($this->readClassAnnotation($property, 'ETag')) {
-                        throw new DefinitionException('Property "%s" on class "%s" was marked as both a complex ' .
-                            'property and an e-tag property. A complex property cannot be marked as an e-tag property.',
-                            $property->getName(), $class->getName());
+                        throw new DefinitionException(sprintf(
+                            'Property "%s" on class "%s" was marked as both a complex property and an e-tag ' .
+                            'property. A complex property cannot be marked as an e-tag property.',
+                            $property->getName(),
+                            $class->getName()
+                        ));
                     }
                     
                     $complexPropertyMetadata = new ComplexPropertyMetadata(
@@ -111,15 +129,21 @@ class AnnotationDriver implements DriverInterface
 
                 if ($annotation = $this->readPropertyAnnotation($property, 'NavigationProperty')) {
                     if ($this->readClassAnnotation($property, 'Key')) {
-                        throw new DefinitionException('Property "%s" on class "%s" was marked as both a navigation ' .
-                            'property and a key property. A navigation property cannot be marked as a key property.',
-                            $property->getName(), $class->getName());
+                        throw new DefinitionException(sprintf(
+                            'Property "%s" on class "%s" was marked as both a navigation property and a key ' .
+                            'property. A navigation property cannot be marked as a key property.',
+                            $property->getName(),
+                            $class->getName()
+                        ));
                     }
                     
                     if ($this->readClassAnnotation($property, 'ETag')) {
-                        throw new DefinitionException('Property "%s" on class "%s" was marked as both a navigation ' .
-                            'property and an e-tag property. A navigation property cannot be marked as an e-tag ' . 
-                            'property.', $property->getName(), $class->getName());
+                        throw new DefinitionException(sprintf(
+                            'Property "%s" on class "%s" was marked as both a navigation property and an e-tag ' .
+                            'property. A navigation property cannot be marked as an e-tag property.',
+                            $property->getName(),
+                            $class->getName()
+                        ));
                     }
                     
                     $navigationPropertyMetadata = new NavigationPropertyMetadata(
@@ -143,29 +167,41 @@ class AnnotationDriver implements DriverInterface
             
             foreach ($class->getProperties() as $property) {
                 if ($this->readPropertyAnnotation($property, 'NavigationProperty')) {
-                    throw new DefinitionException(sprintf('Class "%s" was marked as a complex type, but property ' .
-                        '"%s" was marked as a navigation property. Only entity types can have navigation properties',
-                        $class->getName(), $property->getName()));
+                    throw new DefinitionException(sprintf(
+                        'Class "%s" was marked as a complex type, but property "%s" was marked as a navigation ' .
+                        'property. Only entity types can have navigation properties',
+                        $class->getName(),
+                        $property->getName()
+                    ));
                 }
                 
                 if ($this->readPropertyAnnotation($property, 'Key')) {
-                    throw new DefinitionException(sprintf('Class "%s" was marked as a complex type, yet property ' . 
-                        '"%s" was marked as a key property. Only entity types can have key properties.',
-                        $class->getName(), $property->getName()));
+                    throw new DefinitionException(sprintf(
+                        'Class "%s" was marked as a complex type, yet property "%s" was marked as a key property. ' .
+                        'Only entity types can have key properties.',
+                        $class->getName(),
+                        $property->getName()
+                    ));
                 }
                 
                 if ($this->readPropertyAnnotation($property, 'ETag')) {
-                    throw new DefinitionException(sprintf('Class "%s" was marked as a complex type, yet property ' . 
-                        '"%s" was marked as an e-tag property. Only entity types can have e-tag properties.',
-                        $class->getName(), $property->getName()));
+                    throw new DefinitionException(sprintf(
+                        'Class "%s" was marked as a complex type, yet property "%s" was marked as an e-tag property. ' .
+                        'Only entity types can have e-tag properties.',
+                        $class->getName(),
+                        $property->getName()
+                    ));
                 }
                 
                 if ($this->readPropertyAnnotation($property, 'PrimitiveProperty')
                     && $this->readPropertyAnnotation($property, 'ComplexProperty')
                 ) {
-                    throw new DefinitionException(sprintf('Property "%s" on class "%s" was marked as both a ' .
-                        'primitive and a complex property. A property can either be marked as pirmitive or as ' .
-                        'complex, but may not be marked as both.', $property->getName(), $class->getName()));
+                    throw new DefinitionException(sprintf(
+                        'Property "%s" on class "%s" was marked as both a primitive and a complex property. A ' .
+                        'property can either be marked as pirmitive or as complex, but may not be marked as both.',
+                        $property->getName(),
+                        $class->getName()
+                    ));
                 }
                 
                 if ($annotation = $this->readPropertyAnnotation($property, 'PrimitiveProperty')) {

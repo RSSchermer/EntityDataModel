@@ -56,7 +56,10 @@ class Association extends NamedModelElement
      *                                  Thrown if a value other than 0 or 1 was supplied as the 
      *                                  "on delete" action.
      */
-    public function __construct($name, AssociationEnd $endOne, AssociationEnd $endTwo,
+    public function __construct(
+        $name,
+        AssociationEnd $endOne,
+        AssociationEnd $endTwo,
         $onDeleteAction = self::DELETE_ACTION_NONE
     ) {
         parent::__construct($name);
@@ -68,7 +71,9 @@ class Association extends NamedModelElement
             throw new InvalidArgumentException(sprintf(
                 '"%s" is an illegal value for the "on delete" action. Valid values are %s for no delete action ' .
                 'and %s for cascading the delete.',
-                $onDeleteAction, self::DELETE_ACTION_NONE, self::DELETE_ACTION_CASCADE
+                $onDeleteAction,
+                self::DELETE_ACTION_NONE,
+                self::DELETE_ACTION_CASCADE
             ));
         }
          
