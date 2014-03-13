@@ -21,13 +21,6 @@ abstract class PrimitivePropertyMetadata extends StructuralPropertyMetadata
     
     public $isETag = false;
     
-    public function __construct($class, $property, $type)
-    {
-        parent::__construct($class, $property);
-        
-        $this->type = $type;
-    }
-    
     public function serialize()
     {
         return serialize(array(

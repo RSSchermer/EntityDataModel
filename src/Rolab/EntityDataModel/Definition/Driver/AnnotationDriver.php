@@ -43,11 +43,11 @@ class AnnotationDriver implements DriverInterface
             ));
         }
         
-        if ($entityTypeAnnotation = $this->readClassAnnotation($class, 'EntityType')) {
-            $entityTypeMetadata = new EntityTypeMetadata($class->getName());
-            $entityTypeMetadata->typeName = $entityTypeAnnotation->typeName;
-            $entityTypeMetadata->isAbstract = $entityTypeAnnotation->isAbstract === true ? true : false;
-            $entityTypeMetadata->baseType = $entityTypeAnnotation->baseType;
+        if ($typeAnnotation = $this->readClassAnnotation($class, 'EntityType')) {
+            $typeMetadata = new EntityTypeMetadata($class->getName());
+            $typeMetadata->typeName = $typeAnnotation->typeName;
+            $typeMetadata->isAbstract = $typeAnnotation->isAbstract;
+            $typeMetadata->baseType = $typeAnnotation->baseType;
             
             foreach ($class->getProperties() as $property) {
                 if ($this->readPropertyAnnotation($property, 'PrimitiveProperty')
@@ -84,20 +84,15 @@ class AnnotationDriver implements DriverInterface
                 }
                 
                 if ($annotation = $this->readPropertyAnnotation($property, 'PrimitiveProperty')) {
-                    $primitivePropertyMetadata = new PrimitivePropertyMetadata(
-                        $class->getName(),
-                        $property->getName(),
-                        $annotation->type
-                    );
-                    $primitivePropertyMetadata->isNullable = $annotation->isNullable === true ? true : false;
-                    $primitivePropertyMetadata->isCollection = $annotation->isCollection === true ? true : false;
-                    $primitivePropertyMetadata->isKey = $this->readPropertyAnnotation($property, 'Key') ? true : false;
-                    $primitivePropertyMetadata->isKey = $this->readPropertyAnnotation($property, 'ETag') ? true : false;
+                    $propertyMetadata = new PrimitivePropertyMetadata($class->getName(), $property->getName());
+                    $propertyMetadata->type = $annotation->type;
+                    $propertyMetadata->isNullable = $annotation->isNullable;
+                    $propertyMetadata->isCollection = $annotation->isCollection;
+                    $propertyMetadata->isKey = $this->readPropertyAnnotation($property, 'Key') ? true : false;
+                    $propertyMetadata->isETag = $this->readPropertyAnnotation($property, 'ETag') ? true : false;
                     
-                    $entityTypeMetadata->addPropertyMetadata($primitivePropertyMetadata);
-                }
-                
-                if ($annotation = $this->readPropertyAnnotation($property, 'ComplexProperty')) {
+                    $typeMetadata->addPropertyMetadata($propertyMetadata);
+                } elseif ($annotation = $this->readPropertyAnnotation($property, 'ComplexProperty')) {
                     if ($this->readClassAnnotation($property, 'Key')) {
                         throw new DefinitionException(sprintf(
                             'Property "%s" on class "%s" was marked as both a complex property and a key property. ' .
@@ -116,18 +111,13 @@ class AnnotationDriver implements DriverInterface
                         ));
                     }
                     
-                    $complexPropertyMetadata = new ComplexPropertyMetadata(
-                        $class->getName(),
-                        $property->getName(),
-                        $annotation->className
-                    );
-                    $complexPropertyMetadata->isNullable = $annotation->isNullable === true ? true : false;
-                    $complexPropertyMetadata->isCollection = $annotation->isCollection === true ? true : false;
+                    $propertyMetadata = new ComplexPropertyMetadata($class->getName(), $property->getName());
+                    $propertyMetadata->className = $annotation->className;
+                    $propertyMetadata->isNullable = $annotation->isNullable;
+                    $propertyMetadata->isCollection = $annotation->isCollection;
                     
-                    $entityTypeMetadata->addPropertyMetadata($complexPropertyMetadata);
-                }
-
-                if ($annotation = $this->readPropertyAnnotation($property, 'NavigationProperty')) {
+                    $typeMetadata->addPropertyMetadata($propertyMetadata);
+                } elseif ($annotation = $this->readPropertyAnnotation($property, 'NavigationProperty')) {
                     if ($this->readClassAnnotation($property, 'Key')) {
                         throw new DefinitionException(sprintf(
                             'Property "%s" on class "%s" was marked as both a navigation property and a key ' .
@@ -146,24 +136,21 @@ class AnnotationDriver implements DriverInterface
                         ));
                     }
                     
-                    $navigationPropertyMetadata = new NavigationPropertyMetadata(
-                        $class->getName(),
-                        $property->getName(),
-                        $annotation->targetEntity,
-                        $annotation->role
-                    );
-                    $navigationPropertyMetadata->targetRole = $annotation->targetRole;
-                    $navigationPropertyMetadata->multiplicity = $annotation->multiplicity;
-                    $navigationPropertyMetadata->deleteAction = $annotation->deleteAction;
+                    $propertyMetadata = new NavigationPropertyMetadata($class->getName(), $property->getName());
+                    $propertyMetadata->targetEntity = $annotation->targetEntity;
+                    $propertyMetadata->role = $annotation->role;
+                    $propertyMetadata->targetRole = $annotation->targetRole;
+                    $propertyMetadata->multiplicity = $annotation->multiplicity;
+                    $propertyMetadata->deleteAction = $annotation->deleteAction;
                     
-                    $entityTypeMetadata->addPropertyMetadata($navigationPropertyMetadata);
+                    $typeMetadata->addPropertyMetadata($propertyMetadata);
                 }
             }
             
-            return $entityTypeMetadata;
-        } elseif ($complexTypeAnnotation = $this->readClassAnnotation($class, 'ComplexType')) {
-            $complexTypeMetadata = new ComplexTypeMetadata($class->getName());
-            $complexTypeMetadata->typeName = $complexTypeAnnotation->typeName;
+            return $typeMetadata;
+        } elseif ($typeAnnotation = $this->readClassAnnotation($class, 'ComplexType')) {
+            $typeMetadata = new ComplexTypeMetadata($class->getName());
+            $typeMetadata->typeName = $typeAnnotation->typeName;
             
             foreach ($class->getProperties() as $property) {
                 if ($this->readPropertyAnnotation($property, 'NavigationProperty')) {
@@ -205,31 +192,23 @@ class AnnotationDriver implements DriverInterface
                 }
                 
                 if ($annotation = $this->readPropertyAnnotation($property, 'PrimitiveProperty')) {
-                    $primitivePropertyMetadata = new PrimitivePropertyMetadata(
-                        $class->getName(),
-                        $property->getName(),
-                        $annotation->type
-                    );
-                    $primitivePropertyMetadata->isNullable = $annotation->isNullable === true ? true : false;
-                    $primitivePropertyMetadata->isCollection = $annotation->isCollection === true ? true : false;
+                    $propertyMetadata = new PrimitivePropertyMetadata($class->getName(), $property->getName());
+                    $propertyMetadata->type = $annotation->type;
+                    $propertyMetadata->isNullable = $annotation->isNullable;
+                    $propertyMetadata->isCollection = $annotation->isCollection;
                     
-                    $complexTypeMetadata->addPropertyMetadata($primitivePropertyMetadata);
-                }
-                
-                if ($annotation = $this->readPropertyAnnotation($property, 'ComplexProperty')) {
-                    $complexPropertyMetadata = new ComplexPropertyMetadata(
-                        $class->getName(),
-                        $property->getName(),
-                        $annotation->className
-                    );
-                    $complexPropertyMetadata->isNullable = $annotation->isNullable === true ? true : false;
-                    $complexPropertyMetadata->isCollection = $annotation->isCollection === true ? true : false;
+                    $typeMetadata->addPropertyMetadata($propertyMetadata);
+                } elseif ($annotation = $this->readPropertyAnnotation($property, 'ComplexProperty')) {
+                    $propertyMetadata = new ComplexPropertyMetadata($class->getName(), $property->getName());
+                    $propertyMetadata->className = $annotation->className;
+                    $propertyMetadata->isNullable = $annotation->isNullable === true ? true : false;
+                    $propertyMetadata->isCollection = $annotation->isCollection === true ? true : false;
                     
-                    $complexTypeMetadata->addPropertyMetadata($complexPropertyMetadata);
+                    $typeMetadata->addPropertyMetadata($propertyMetadata);
                 }
             }
             
-            return $complexTypeMetadata;
+            return $typeMetadata;
         }
         
         return new NullMetadata();

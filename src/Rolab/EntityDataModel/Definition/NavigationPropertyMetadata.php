@@ -25,14 +25,6 @@ class NavigationPropertyMetadata extends PropertyMetadata
     
     public $deleteAction = 'none';
     
-    public function __construct($class, $property, $targetEntity, $role = null)
-    {
-        parent::__construct($class, $property);
-        
-        $this->targetEntity = $targetEntity;
-        $this->role = $role !== null ? $role : $propertyName;
-    }
-    
     public function serialize()
     {
         return serialize(array(

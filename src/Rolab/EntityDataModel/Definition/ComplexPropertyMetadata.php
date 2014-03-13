@@ -17,13 +17,6 @@ abstract class ComplexPropertyMetadata extends StructuralPropertyMetadata
 {
     public $className;
     
-    public function __construct($class, $property, $className)
-    {
-        parent::__construct($class, $property);
-        
-        $this->className = $className;
-    }
-    
     public function serialize()
     {
         return serialize(array(
