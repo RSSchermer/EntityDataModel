@@ -110,7 +110,7 @@ class EntityTypeTest extends EntityDataModelTestCase
     {
         $structuralPropertyDescription = $this->buildStructuralPropertyDescriptionStub('Structural');
 
-        $entityType->addPropertyDescription($structuralPropertyDescription);
+        $entityType->addStructuralPropertyDescription($structuralPropertyDescription);
 
         $this->assertContains($structuralPropertyDescription, $entityType->getPropertyDescriptions());
         $this->assertContains($structuralPropertyDescription, $entityType->getStructuralPropertyDescriptions());
@@ -126,7 +126,7 @@ class EntityTypeTest extends EntityDataModelTestCase
     {
         $eTagPropertyDescription = $this->buildETagPropertyDescriptionStub('ETag');
 
-        $entityType->addPropertyDescription($eTagPropertyDescription);
+        $entityType->addStructuralPropertyDescription($eTagPropertyDescription);
 
         $this->assertContains($eTagPropertyDescription, $entityType->getPropertyDescriptions());
         $this->assertContains($eTagPropertyDescription, $entityType->getStructuralPropertyDescriptions());
@@ -142,7 +142,7 @@ class EntityTypeTest extends EntityDataModelTestCase
     {
         $navigationPropertyDescription = $this->buildNavigationPropertyDescriptionStub('Navigation');
 
-        $entityType->addPropertyDescription($navigationPropertyDescription);
+        $entityType->addStructuralPropertyDescription($navigationPropertyDescription);
 
         $this->assertContains($navigationPropertyDescription, $entityType->getPropertyDescriptions());
         $this->assertNotContains($navigationPropertyDescription, $entityType->getStructuralPropertyDescriptions());
@@ -159,7 +159,7 @@ class EntityTypeTest extends EntityDataModelTestCase
     {
         $navigationPropertyDescription = $this->buildNavigationPropertyDescriptionStub('Name');
 
-        $entityType->addPropertyDescription($navigationPropertyDescription);
+        $entityType->addStructuralPropertyDescription($navigationPropertyDescription);
     }
 
     /**
@@ -170,7 +170,7 @@ class EntityTypeTest extends EntityDataModelTestCase
     {
         $keyPropertyDescription = $this->buildKeyPropertyDescriptionStub('Key');
 
-        $entityType->addPropertyDescription($keyPropertyDescription);
+        $entityType->addStructuralPropertyDescription($keyPropertyDescription);
     }
 
     /**

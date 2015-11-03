@@ -133,7 +133,7 @@ class EntityDataModelTest extends EntityDataModelTestCase
      */
     public function testGetStructuralTypesInitiallyEmpty(EntityDataModel $edm)
     {
-        $this->assertEmpty($edm->getStructuralTypes());
+        $this->assertEmpty($edm->getStructuredTypes());
 
         return $edm;
     }
@@ -149,10 +149,10 @@ class EntityDataModelTest extends EntityDataModelTestCase
             ->method('setEntityDataModel')
             ->with($this->equalTo($edm));
 
-        $edm->addStructuralType($mockStructuralType);
+        $edm->addStructuredType($mockStructuralType);
 
-        $this->assertCount(1, $edm->getStructuralTypes());
-        $this->assertContains($mockStructuralType, $edm->getStructuralTypes());
+        $this->assertCount(1, $edm->getStructuredTypes());
+        $this->assertContains($mockStructuralType, $edm->getStructuredTypes());
 
         return $edm;
     }
@@ -163,7 +163,7 @@ class EntityDataModelTest extends EntityDataModelTestCase
      */
     public function testExceptionOnAddStructuralTypeWithSameName(EntityDataModel $edm)
     {
-        $edm->addStructuralType($this->buildStructuralTypeStub('SomeType', 'Some\Other\Class'));
+        $edm->addStructuredType($this->buildStructuralTypeStub('SomeType', 'Some\Other\Class'));
     }
 
     /**
@@ -172,7 +172,7 @@ class EntityDataModelTest extends EntityDataModelTestCase
      */
     public function testExceptionOnAddStructuralTypeWithSameClassName(EntityDataModel $edm)
     {
-        $edm->addStructuralType($this->buildStructuralTypeStub('SomeOtherType', 'Some\Class'));
+        $edm->addStructuredType($this->buildStructuralTypeStub('SomeOtherType', 'Some\Class'));
     }
 
     /**
@@ -187,9 +187,9 @@ class EntityDataModelTest extends EntityDataModelTestCase
     {
         $stucturalTypeStub = $this->buildStructuralTypeStub('SomeOtherType', 'Some\Other\Class');
 
-        $edm->addStructuralType($stucturalTypeStub);
+        $edm->addStructuredType($stucturalTypeStub);
 
-        $this->assertSame($stucturalTypeStub, $edm->getStructuralTypeByName('SomeOtherType'));
+        $this->assertSame($stucturalTypeStub, $edm->getStructuredTypeByName('SomeOtherType'));
 
         return $edm;
     }
@@ -201,9 +201,9 @@ class EntityDataModelTest extends EntityDataModelTestCase
     {
         $stucturalTypeStub = $this->buildStructuralTypeStub('SomeThirdType', 'Some\Third\Class');
 
-        $edm->addStructuralType($stucturalTypeStub);
+        $edm->addStructuredType($stucturalTypeStub);
 
-        $this->assertSame($stucturalTypeStub, $edm->getStructuralTypeByClassName('Some\Third\Class'));
+        $this->assertSame($stucturalTypeStub, $edm->getStructuredTypeByClassName('Some\Third\Class'));
     }
 
     /**
@@ -356,16 +356,16 @@ class EntityDataModelTest extends EntityDataModelTestCase
         $stucturalTypeStubInMainModel = $this->buildStructuralTypeStub('MainModelType', 'Some\Class');
         $stucturalTypeStubInReferencedModel = $this->buildStructuralTypeStub('ReferencedModelType', 'Some\Other\Class');
 
-        $edm->addStructuralType($stucturalTypeStubInMainModel);
-        $referencedModel->addStructuralType($stucturalTypeStubInReferencedModel);
+        $edm->addStructuredType($stucturalTypeStubInMainModel);
+        $referencedModel->addStructuredType($stucturalTypeStubInReferencedModel);
 
-        $this->assertNull($edm->findStructuralTypeByFullName('NonExistantName'));
-        $this->assertSame($stucturalTypeStubInMainModel, $edm->findStructuralTypeByFullName(
+        $this->assertNull($edm->findStructuredTypeByFullName('NonExistantName'));
+        $this->assertSame($stucturalTypeStubInMainModel, $edm->findStructuredTypeByFullName(
             'Self.MainModelType'));
-        $this->assertSame($stucturalTypeStubInMainModel, $edm->findStructuralTypeByFullName(
+        $this->assertSame($stucturalTypeStubInMainModel, $edm->findStructuredTypeByFullName(
             'MainModelType'));
         $this->assertNull($edm->findAssociationByFullName('ReferencedModelType'));
-        $this->assertSame($stucturalTypeStubInReferencedModel, $edm->findStructuralTypeByFullName(
+        $this->assertSame($stucturalTypeStubInReferencedModel, $edm->findStructuredTypeByFullName(
             'Referenced.ReferencedModelType'));
     }
 

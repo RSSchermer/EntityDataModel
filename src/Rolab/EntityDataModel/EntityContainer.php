@@ -1,19 +1,9 @@
 <?php
 
-/*
- * This file is part of the Rolab Entity Data Model library.
- *
- * (c) Roland Schermer <roland0507@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types=1);
 
 namespace Rolab\EntityDataModel;
 
-use Rolab\EntityDataModel\NamedModelElement;
-use Rolab\EntityDataModel\EntitySet;
-use Rolab\EntityDataModel\AssociationSet;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
@@ -38,11 +28,6 @@ class EntityContainer extends NamedModelElement
     private $entitySets = array();
     
     /**
-     * @var array
-     */
-    private $associationSets = array();
-    
-    /**
      * Creates a new entity container.
      * 
      * Creates a new entity container. A parent container may be specified, in which
@@ -56,7 +41,7 @@ class EntityContainer extends NamedModelElement
      * 
      * @throws InvalidArgumentException Thrown if the container's name contains illegal characters.
      */
-    public function __construct($name, EntityContainer $parentContainer = null)
+    public function __construct(string $name, EntityContainer $parentContainer = null)
     {
         parent::__construct($name);
         
@@ -111,10 +96,13 @@ class EntityContainer extends NamedModelElement
      * 
      * @return EntitySet[] An array container all entity sets in the entity containers.
      */
-    public function getEntitySets()
+    public function getEntitySets() : array
     {
-        return isset($this->parentContainer) ?
-            array_merge($this->parentContainer->getEntitySets(), $this->entitySets) : $this->entitySets;
+        if (isset($this->parentContainer)) {
+            return array_merge($this->parentContainer->getEntitySets(), $this->entitySets);
+        }
+
+        return $this->entitySets;
     }
     
     /**
@@ -131,86 +119,8 @@ class EntityContainer extends NamedModelElement
      */
     public function getEntitySetByName($name)
     {
-        $entitySets = isset($this->parentContainer) ?
-            array_merge($this->parentContainer->getEntitySets(), $this->entitySets) : $this->entitySets;
+        $entitySets = $this->getEntitySets();
 
         return isset($entitySets[$name]) ? $entitySets[$name] : null;
-    }
-    
-    /**
-     * Adds an association set to the entity container.
-     * 
-     * Adds an association set to the entity container. Association sets within one entity
-     * container must have unique names. However, an association set may have the same
-     * name as another association set in the parent container, in which case the assocation
-     * set in the parent container is overriden.
-     * 
-     * @param EntitySet $entitySet The entity set to be added to the entity container
-     * 
-     * @throws InvalidArgumentException Thrown if an entity set is added with a name that
-     *                                  is already in use by another entity set in the same
-     *                                  entity container.
-     *                                  Thrown if either association set ends link an entity
-     *                                  set that is not contained in this same container.
-     */
-    public function addAssociationSet(AssociationSet $associationSet)
-    {
-        if (isset($this->associationSets[$associationSet->getName()])) {
-            throw new InvalidArgumentException(sprintf(
-                'The entity container already contains an association set by the name "%s"',
-                $associationSet->getName()
-            ));
-        }
-        
-        foreach ($associationSet->getSetEnds() as $setEnd) {
-            if (null === $this->getEntitySetByName($setEnd->getEntitySet()->getName())) {
-                throw new InvalidArgumentException(sprintf(
-                    'The entity set ends in the association set must point to entity sets in this container or ' .
-                    'in the container\'s parent container.',
-                    $associationSet->getName()
-                ));
-            }
-        }
-
-        $this->associationSets[$associationSet->getName()] = $associationSet;
-
-        $associationSet->setEntityContainer($this);
-    }
-    
-    /**
-     * Returns all association sets in the current entity container.
-     * 
-     * Returns all association sets in the current entity container. If a container has a
-     * parent container, association sets in the parent container will also be returned. If
-     * an association set in the parent container has the same name as an association set
-     * in the child container, only the assocation set in the child container will be
-     * returned.
-     * 
-     * @return AssociationSet[] An array container all entity sets in the entity containers.
-     */
-    public function getAssociationSets()
-    {
-        return isset($this->parentContainer) ?
-            array_merge($this->parentContainer->getAssociationSets(), $this->associationSets) : $this->associationSets;
-    }
-    
-    /**
-     * Searches the entity container for an association set with a specific name.
-     * 
-     * Searches the entity container for an association set with a specific name and if an
-     * association set with that name exists in either the container itself, or the parent
-     * container, an association set will be returned. If the both the child container and
-     * the parent container contain an association set with the same name, only the association
-     * set in the child container will be returned.
-     * 
-     * @return null|AssociationSet An association set with the name searched for or null if no
-     *                             such association set exists in the container.
-     */
-    public function getAssociationSetByName($associationSetName)
-    {
-        $associationSets = isset($this->parentContainer) ?
-            array_merge($this->parentContainer->getAssociationSets(), $this->associationSets) : $this->associationSets;
-
-        return isset($associationSets[$associationSetName]) ? $associationSets[$associationSetName] : null;
     }
 }

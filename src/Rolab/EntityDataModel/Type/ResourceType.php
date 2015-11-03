@@ -1,21 +1,16 @@
 <?php
 
-/*
- * This file is part of the Rolab Entity Data Model library.
- *
- * (c) Roland Schermer <roland0507@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types=1);
 
 namespace Rolab\EntityDataModel\Type;
+
+use Rolab\EntityDataModel\NamedModelConstruct;
 
 /**
  * Represents a named resource type definition.
  * 
  * @author Roland Schermer <roland0507@gmail.com>
  */
-interface ResourceType
+interface ResourceType extends NamedModelConstruct
 {
 }

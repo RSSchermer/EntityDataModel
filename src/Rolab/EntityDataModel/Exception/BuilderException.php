@@ -11,8 +11,6 @@
 
 namespace Rolab\EntityDataModel\Exception;
 
-use Rolab\EntityDataModel\Exception\ExceptionInterface;
-
 class BuilderException extends \RuntimeException implements ExceptionInterface
 {
 }

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Rolab\EntityDataModel\Type\Edm;
 
-class DateTimeOffset extends EdmPrimitiveType
+class Duration extends EdmPrimitiveType
 {
     public function getName() : string
     {
-        return 'DateTimeOffset';
+        return 'Duration';
     }
 }

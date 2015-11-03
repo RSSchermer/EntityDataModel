@@ -13,7 +13,7 @@ namespace Rolab\EntityDataModel\Tests\Type;
 
 use Rolab\EntityDataModel\Tests\EntityDataModelTestCase;
 
-use Rolab\EntityDataModel\Type\StructuralType;
+use Rolab\EntityDataModel\Type\StructuredType;
 
 /**
  * @covers StructuralType
@@ -54,7 +54,7 @@ class StructuralTypeTest extends EntityDataModelTestCase
     /**
      * @depends testConstructor
      */
-    public function testSetEntityDataModel(StructuralType $structuralType)
+    public function testSetEntityDataModel(StructuredType $structuralType)
     {
         $entityDataModelStub = $this->getMockBuilder('Rolab\EntityDataModel\EntityDataModel')
             ->disableOriginalConstructor()

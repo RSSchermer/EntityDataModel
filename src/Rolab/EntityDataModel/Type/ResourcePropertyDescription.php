@@ -1,18 +1,10 @@
 <?php
 
-/*
- * This file is part of the Rolab Entity Data Model library.
- *
- * (c) Roland Schermer <roland0507@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types=1);
 
 namespace Rolab\EntityDataModel\Type;
 
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
-use Rolab\EntityDataModel\Type\ComplexType;
 
 /**
  * Describes a property of a complex type.
@@ -27,27 +19,50 @@ abstract class ResourcePropertyDescription
     private $name;
     
     /**
-     * @var ReflectionProperty
+     * @var \ReflectionProperty
      */
     private $reflection;
     
     /**
      * @var ComplexType
      */
-    private $complexType;
-    
+    private $structuredType;
+
+    /**
+     * @var ResourceType
+     */
+    private $propertyValueType;
+
+    /**
+     * @var boolean
+     */
+    private $isCollection;
+
+    /**
+     * @var boolean
+     */
+    private $nullable;
+
     /**
      * Creates a new resource property description.
-     * 
-     * @param string             $name       The name of the resource property description (may
-     *                                       only consist of alphanumeric characters and the
-     *                                       underscore).
-     * @param ReflectionProperty $reflection A reflection object for the property being described.
-     * 
+     *
+     * @param string              $name              The name of the structural property description. (may
+     *                                               only consist of alphanumeric characters and the
+     *                                               underscore).
+     * @param \ReflectionProperty $reflection        A reflection object for the property being described.
+     * @param ResourceType        $propertyValueType The type of the property value.
+     * @param boolean             $isCollection      Whether or not the property value is a collection.
+     * @param boolean             $nullable          Whether or not the property is nullable.
+     *
      * @throws InvalidArgumentException Thrown if the name contains illegal characters.
      */
-    public function __construct($name, \ReflectionProperty $reflection)
-    {
+    public function __construct(
+        string $name,
+        \ReflectionProperty $reflection,
+        ResourceType $propertyValueType,
+        bool $isCollection = false,
+        bool $nullable = true
+    ) {
         if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
             throw new InvalidArgumentException(sprintf(
                 '"%s" is an illegal name for a property description. The name for a property descriptions may only ' .
@@ -58,27 +73,30 @@ abstract class ResourcePropertyDescription
 
         $this->name = $name;
         $this->reflection = $reflection;
+        $this->propertyValueType = $propertyValueType;
+        $this->isCollection = $isCollection;
+        $this->nullable = $nullable;
     }
     
     /**
-     * Sets the complex type this resource property description belongs to.
+     * Sets the structured type this resource property description belongs to.
      * 
-     * @param ComplexType $complexType The complex type this resource property description
+     * @param ComplexType $structuredType The structured type this resource property description
      *                                 belongs to.
      */
-    public function setComplexType(ComplexType $complexType)
+    public function setStructuredType(ComplexType $structuredType)
     {
-        $this->complexType = $complexType;
+        $this->structuredType = $structuredType;
     }
     
     /**
-     * Returns the complex type this resource property description belongs to.
+     * Returns the structured type this resource property description belongs to.
      * 
-     * @return null|ComplexType The complex type this resource property description belongs to.
+     * @return null|ComplexType The structured type this resource property description belongs to.
      */
-    public function getComplexType()
+    public function getStructuredType()
     {
-        return $this->complexType;
+        return $this->structuredType;
     }
     
     /**
@@ -86,7 +104,7 @@ abstract class ResourcePropertyDescription
      * 
      * @return string The name of the resource property description.
      */
-    public function getName()
+    public function getName() : string
     {
         return $this->name;
     }
@@ -95,11 +113,35 @@ abstract class ResourcePropertyDescription
      * Returns the reflection for the property that is described by the resource
      * property description.
      * 
-     * @return ReflectionProperty The reflection for the property that is described by
-     *                            the resource property description.
+     * @return \ReflectionProperty The reflection for the property that is described by
+     *                             the resource property description.
      */
-    public function getReflection()
+    public function getReflection() : \ReflectionProperty
     {
         return $this->reflection;
+    }
+
+    public function getPropertyValueType() : ResourceType
+    {
+        return $this->propertyValueType;
+    }
+
+    public function isCollection() : bool
+    {
+        return (bool) $this->isCollection;
+    }
+
+    public function setNullable($nullable)
+    {
+        if (!is_bool($nullable)) {
+            throw new InvalidArgumentException('Only boolean values are allowed.');
+        }
+
+        $this->nullable = $nullable;
+    }
+
+    public function isNullable() : bool
+    {
+        return isset($this->nullable) ? $this->nullable : true;
     }
 }

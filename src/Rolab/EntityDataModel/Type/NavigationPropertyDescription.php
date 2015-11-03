@@ -1,18 +1,10 @@
 <?php
 
-/*
- * This file is part of the Rolab Entity Data Model library.
- *
- * (c) Roland Schermer <roland0507@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types=1);
 
 namespace Rolab\EntityDataModel\Type;
 
-use Rolab\EntityDataModel\Type\ResourcePropertyDescription;
-use Rolab\EntityDataModel\Association;
+use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
  * Describes a navigation property of an entity type.
@@ -21,87 +13,96 @@ use Rolab\EntityDataModel\Association;
  */
 class NavigationPropertyDescription extends ResourcePropertyDescription
 {
+    const DELETE_ACTION_NONE = 0;
+
+    const DELETE_ACTION_CASCADE = 1;
+
+    const DELETE_ACTION_SET_NULL = 2;
+
+    const DELETE_ACTION_SET_DEFAULT = 3;
+
     /**
-     * @var Association
+     * @var NavigationPropertyDescription
      */
-    private $association;
-    
+    private $partner;
+
     /**
-     * @var string
+     * @var integer
      */
-    private $toRole;
-    
+    private $onDeleteAction;
+
     /**
-     * @var string
+     * Creates a new resource property description.
+     *
+     * @param string              $name              The name of the structural property description. (may
+     *                                               only consist of alphanumeric characters and the
+     *                                               underscore).
+     * @param \ReflectionProperty $reflection        A reflection object for the property being described.
+     * @param EntityType          $propertyValueType The type of the property value.
+     * @param boolean             $isCollection      Whether or not the property value is a collection.
+     * @param boolean             $nullable          Whether or not the property is nullable.
+     * @param integer             $onDeleteAction    Valid values are NavigationPropertyDescription::ON_DELETE_NONE,
+     *                                               NavigationPropertyDescription::ON_DELETE_CASCADE,
+     *                                               NavigationPropertyDescription::ON_DELETE_SET_NULL and
+     *                                               NavigationPropertyDescription::ON_DELETE_SET_DEFAULT.
+     *
+     * @throws InvalidArgumentException Thrown if the name contains illegal characters.
      */
-    private $fromRole;
-    
-    /**
-     * Creates a new navigation property description.
-     * 
-     * @param string             $name        The name of the navigation property description.
-     * @param ReflectionProperty $reflection  Reflection of the property described.
-     * @param Association        $association The association describing the navigation relation.
-     * @param string             $fromRole    The name of the 'from' role in the association.
-     * @param string             $toRole      The name of the 'to' role in the association.
-     * 
-     * @throws InvalidArgumentException Thrown if no role exists on the association with the 'from' role name.
-     *                                  Thrown if no role exists on the association with the 'to' role name.
-     */
-    public function __construct($name, \ReflectionProperty $reflection, Association $association, $fromRole, $toRole)
+    public function __construct(
+        string $name,
+        \ReflectionProperty $reflection,
+        EntityType $propertyValueType,
+        bool $isCollection = false,
+        bool $nullable = true,
+        int $onDeleteAction = self::DELETE_ACTION_NONE
+    ) {
+        parent::__construct($name, $reflection, $propertyValueType, $isCollection, $nullable);
+
+        $this->setOnDeleteAction($onDeleteAction);
+    }
+
+    public function setPartner(NavigationPropertyDescription $partner)
     {
-        parent::__construct($name, $reflection);
+        if ($partner->getStructuredType() !== $this->getPropertyValueType()) {
+            throw new InvalidArgumentException(
+                'A navigation property\'s partner must be a declared on the entity type that is the target' .
+                'of this navigation property.'
+            );
+        }
 
-        $this->association = $association;
+        $this->partner = $partner;
+    }
 
-        if (is_null($association->getEndByRole($fromRole))) {
+    public function getPartner()
+    {
+        return $this->partner;
+    }
+
+    public function setOnDeleteAction($onDeleteAction)
+    {
+        if (!in_array($onDeleteAction, array(
+            self::DELETE_ACTION_NONE,
+            self::DELETE_ACTION_CASCADE,
+            self::DELETE_ACTION_SET_NULL,
+            self::DELETE_ACTION_SET_DEFAULT
+        ))) {
             throw new InvalidArgumentException(sprintf(
-                'Role "%s" could not be found in the association. The "from" role must reference a role name of ' .
-                'an association end in the association.',
-                $fromRole
+                '"%s" is an illegal value for the "on delete" action. Valid values are %s for no delete action, ' .
+                '%s for cascading the delete, %s for setting the property to null and %s for setting the ' .
+                'property to its default value.',
+                $onDeleteAction,
+                self::DELETE_ACTION_NONE,
+                self::DELETE_ACTION_CASCADE,
+                self::DELETE_ACTION_SET_NULL,
+                self::DELETE_ACTION_SET_DEFAULT
             ));
         }
 
-        $this->fromRole = $fromRole;
+        $this->onDeleteAction = $onDeleteAction;
+    }
 
-        if (is_null($association->getEndByRole($toRole))) {
-            throw new InvalidArgumentException(sprintf(
-                'Role "%s" could not be found in the association. The "to" role must reference a role name of an ' .
-                'association end in the association.',
-                $toRole
-            ));
-        }
-
-        $this->toRole = $toRole;
-    }
-    
-    /**
-     * Returns the association that describes the navigation relation.
-     * 
-     * @return Association The association that describes the navigation relation.
-     */
-    public function getAssociation()
+    public function getOnDeleteAction() : int
     {
-        return $this->association;
-    }
-    
-    /**
-     * Returns the name of the 'from' role.
-     * 
-     * @return string The name of the 'from' role.
-     */
-    public function getFromRole()
-    {
-        return $this->fromRole;
-    }
-    
-    /**
-     * Returns the name of the 'to' role.
-     * 
-     * @return string The name of the 'to' role.
-     */
-    public function getToRole()
-    {
-        return $this->toRole;
+        return $this->onDeleteAction;
     }
 }

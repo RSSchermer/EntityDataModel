@@ -1,28 +1,17 @@
 <?php
 
-/*
- * This file is part of the Rolab Entity Data Model library.
- *
- * (c) Roland Schermer <roland0507@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types=1);
 
 namespace Rolab\EntityDataModel\Type;
 
-use Rolab\EntityDataModel\Type\StructuralType;
-use Rolab\EntityDataModel\Type\ResourcePropertyDescription;
-use Rolab\EntityDataModel\Type\StructuralPropertyDescription;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
-use Rolab\EntityDataModel\Exception\RuntimeException;
 
 /**
  * Represents a complex data type with one or more properties.
  * 
  * @author Roland Schermer <roland0507@gmail.com>
  */
-class ComplexType extends StructuralType
+class ComplexType extends StructuredType
 {
     /**
      * @var array
@@ -32,29 +21,29 @@ class ComplexType extends StructuralType
     /**
      * Creates a new complex type.
      * 
-     * @param string                        $name                 The name of the complex type (may only
-     *                                                            contain alphanumeric characters and the
-     *                                                            underscore).
-     * @param ReflectionClass               $reflection           Reflection of the class this structural
-     *                                                            type maps to.
-     * @param ResourcePropertyDescription[] $propertyDescriptions Descriptions for each of the properties.
+     * @param string                         $name                 The name of the complex type (may only
+     *                                                             contain alphanumeric characters and the
+     *                                                             underscore).
+     * @param \ReflectionClass               $reflection           Reflection of the class this structural
+     *                                                             type maps to.
+     * @param ResourcePropertyDescription[]  $propertyDescriptions Descriptions for each of the properties.
      * 
      * @throws InvalidArgumentException Thrown if the name contains illegal characters.
      *                                  Thrown if the property description list is empty.
      */
-    public function __construct($name, \ReflectionClass $reflection, array $propertyDescriptions)
+    public function __construct(string $name, \ReflectionClass $reflection, array $structuralPropertyDescriptions)
     {
         parent::__construct($name, $reflection);
 
-        if (count($propertyDescriptions) === 0) {
+        if (count($structuralPropertyDescriptions) === 0) {
             throw new InvalidArgumentException(
                 'May not pass an empty array of property descriptions. A complex type must always have atleast one ' .
                 'property.'
             );
         }
 
-        foreach ($propertyDescriptions as $propertyDescription) {
-            $this->addPropertyDescription($propertyDescription);
+        foreach ($structuralPropertyDescriptions as $propertyDescription) {
+            $this->addStructuralPropertyDescription($propertyDescription);
         }
     }
     
@@ -70,7 +59,7 @@ class ComplexType extends StructuralType
      * @throws InvalidArgumentException Thrown if the complex type already has a property with
      *                                  the same name.
      */
-    public function addPropertyDescription(ResourcePropertyDescription $propertyDescription)
+    public function addStructuralPropertyDescription(ResourcePropertyDescription $propertyDescription)
     {
         $propertyDescriptions = $this->getPropertyDescriptions();
 
@@ -82,27 +71,8 @@ class ComplexType extends StructuralType
             ));
         }
 
-        $this->addStructuralPropertyDescription($propertyDescription);
-    }
-    
-    /**
-     * Removes a property description from the complex type.
-     * 
-     * Removes a property description from the complex type if a property with the name
-     * specified exists. Complex types must always remain with at least one property.
-     * 
-     * @param string $propertyDescriptionName The name of the property to be removed.
-     * 
-     * @throws InvalidArgumentException Thrown if the property removed was the last remaining
-     *                                  property of the complex type.
-     */
-    public function removePropertyDescription($propertyDescriptionName)
-    {
-        unset($this->structuralPropertyDescriptions[$propertyDescriptionName]);
-
-        if (count($this->getPropertyDescriptions()) === 0) {
-            throw new RuntimeException('A complex type must keep atleast one property.');
-        }
+        $this->structuralPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
+        $propertyDescription->setStructuredType($this);
     }
     
     /**
@@ -110,7 +80,7 @@ class ComplexType extends StructuralType
      * 
      * @return ResourcePropertyDescription[] The property descriptions for this complex type.
      */
-    public function getPropertyDescriptions()
+    public function getPropertyDescriptions() : array
     {
         return $this->getStructuralPropertyDescriptions();
     }
@@ -124,7 +94,7 @@ class ComplexType extends StructuralType
      * @return StructuralPropertyDescription[] The structural property descriptions for this
      *                                         complex type.
      */
-    public function getStructuralPropertyDescriptions()
+    public function getStructuralPropertyDescriptions() : array
     {
         return $this->structuralPropertyDescriptions;
     }
@@ -132,19 +102,17 @@ class ComplexType extends StructuralType
     /**
      * Searches for a property description on this complex type bases on its name.
      * 
-     * @return null|ResourcePropertyDescription[] Returns the resource property with the name searched
+     * @return null|ResourcePropertyDescription Returns the resource property with the name searched
      *                                            for or null if no such property exists.
      */
     public function getPropertyDescriptionByName($propertyDescriptionName)
     {
         $propertyDescriptions = $this->getPropertyDescriptions();
 
-        return isset($propertyDescriptions[$propertyDescriptionName]) ?
-            $propertyDescriptions[$propertyDescriptionName] : null;
-    }
+        if (isset($propertyDescriptions[$propertyDescriptionName])) {
+            return $propertyDescriptions[$propertyDescriptionName];
+        }
 
-    protected function addStructuralPropertyDescription(StructuralPropertyDescription $propertyDescription)
-    {
-        $this->structuralPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
+        return null;
     }
 }

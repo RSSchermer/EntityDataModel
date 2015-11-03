@@ -1,18 +1,9 @@
 <?php
 
-/*
- * This file is part of the Rolab Entity Data Model library.
- *
- * (c) Roland Schermer <roland0507@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types=1);
 
 namespace Rolab\EntityDataModel;
 
-use Rolab\EntityDataModel\NamedModelConstruct;
-use Rolab\EntityDataModel\EntityDataModel;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
@@ -40,7 +31,7 @@ abstract class NamedContainerElement
      * 
      * @throws InvalidArgumentException Thrown if the container element's name contains illegal characters.
      */
-    public function __construct($name)
+    public function __construct(string $name)
     {
         if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
             throw new InvalidArgumentException(sprintf(
@@ -58,7 +49,7 @@ abstract class NamedContainerElement
      *
      * @return string The name of the named container element.
      */
-    public function getName()
+    public function getName() : string
     {
         return $this->name;
     }

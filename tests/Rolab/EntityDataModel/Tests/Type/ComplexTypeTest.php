@@ -61,7 +61,7 @@ class ComplexTypeTest extends EntityDataModelTestCase
 
         $propertyStub = $this->buildStructuralPropertyDescriptionStub('Street');
 
-        $complexType->addPropertyDescription($propertyStub);
+        $complexType->addStructuralPropertyDescription($propertyStub);
 
         $this->assertCount(2, $complexType->getPropertyDescriptions());
         $this->assertContains($propertyStub, $complexType->getPropertyDescriptions());
@@ -75,7 +75,7 @@ class ComplexTypeTest extends EntityDataModelTestCase
      */
     public function testExceptionOnAddPropertyWithSameName(ComplexType $complexType)
     {
-        $complexType->addPropertyDescription($this->buildStructuralPropertyDescriptionStub('Street'));
+        $complexType->addStructuralPropertyDescription($this->buildStructuralPropertyDescriptionStub('Street'));
     }
 
     /**
@@ -85,7 +85,7 @@ class ComplexTypeTest extends EntityDataModelTestCase
     {
         $someProperty = $this->buildStructuralPropertyDescriptionStub('HouseNumber');
 
-        $complexType->addPropertyDescription($someProperty);
+        $complexType->addStructuralPropertyDescription($someProperty);
 
         $this->assertCount(3, $complexType->getPropertyDescriptions());
         $this->assertContains($someProperty, $complexType->getPropertyDescriptions());
@@ -114,7 +114,7 @@ class ComplexTypeTest extends EntityDataModelTestCase
     {
         $someProperty = $this->buildStructuralPropertyDescriptionStub('HouseNumber');
 
-        $complexType->addPropertyDescription($someProperty);
+        $complexType->addStructuralPropertyDescription($someProperty);
 
         $this->assertSame($someProperty, $complexType->getPropertyDescriptionByName('HouseNumber'));
     }

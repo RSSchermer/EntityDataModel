@@ -62,8 +62,8 @@ class ResourcePropertyDescriptionTest extends EntityDataModelTestCase
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
 
-        $resourcePropertyDescription->setComplexType($complexTypeStub);
+        $resourcePropertyDescription->setStructuredType($complexTypeStub);
 
-        $this->assertSame($complexTypeStub, $resourcePropertyDescription->getComplexType());
+        $this->assertSame($complexTypeStub, $resourcePropertyDescription->getStructuredType());
     }
 }
