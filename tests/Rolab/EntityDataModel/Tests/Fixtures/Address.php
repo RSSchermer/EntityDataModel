@@ -11,11 +11,11 @@
 
 namespace Rolab\EntityDataModel\Tests\Fixtures;
 
-class Car
+class Address
 {
-    private $registrationNumber;
+    private $city;
 
-    private $engine;
+    private $street;
 
-    private $kilometersDriven;
+    private $houseNumber;
 }

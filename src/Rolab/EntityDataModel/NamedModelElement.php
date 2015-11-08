@@ -45,9 +45,7 @@ abstract class NamedModelElement implements NamedModelConstruct
     }
 
     /**
-     * Returns the name of the named model construct without namespace prefix.
-     *
-     * @return string The name of the named model construct.
+     * {@inheritDoc}
      */
     public function getName() : string
     {
@@ -82,7 +80,7 @@ abstract class NamedModelElement implements NamedModelConstruct
     /**
      * {@inheritDoc}
      */
-    public function getNamespace()
+    public function getNamespace() : string
     {
         return isset($this->entityDataModel) ? $this->entityDataModel->getNamespace() : "";
     }

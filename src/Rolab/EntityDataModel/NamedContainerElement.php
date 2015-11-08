@@ -77,4 +77,35 @@ abstract class NamedContainerElement
     {
         return $this->entityContainer;
     }
+
+    /**
+     * Returns true if the container element is defined on the given entity container or a parent container of that
+     * entity container, false otherwise.
+     *
+     * @param EntityContainer $entityContainer The entity container on which to check if this element is contained.
+     *
+     * @return bool Whether or not this element is contained in the given entity container.
+     */
+    public function isContainedIn(EntityContainer $entityContainer) : bool
+    {
+        if (null === $this->getEntityContainer()) {
+            return false;
+        }
+
+        if ($entityContainer === $this->getEntityContainer()) {
+            return true;
+        }
+
+        $parentContainer = $entityContainer->getParentContainer();
+
+        while (null !== $parentContainer) {
+            if ($parentContainer === $this->getEntityContainer()) {
+                return true;
+            }
+
+            $parentContainer = $parentContainer->getParentContainer();
+        }
+
+        return false;
+    }
 }

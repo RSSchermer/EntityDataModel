@@ -7,7 +7,7 @@ namespace Rolab\EntityDataModel\Type;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
- * Describes a property of a complex type.
+ * Describes a property on a structured type.
  * 
  * @author Roland Schermer <roland0507@gmail.com>
  */
@@ -121,27 +121,34 @@ abstract class ResourcePropertyDescription
         return $this->reflection;
     }
 
+    /**
+     * Returns this property's value type.
+     *
+     * @return ResourceType This property's value type.
+     */
     public function getPropertyValueType() : ResourceType
     {
         return $this->propertyValueType;
     }
 
+    /**
+     * Returns true if this property hold a collection of values, false if it holds
+     * a singular value.
+     *
+     * @return bool Whether or not this property holds a collection of values.
+     */
     public function isCollection() : bool
     {
-        return (bool) $this->isCollection;
+        return $this->isCollection;
     }
 
-    public function setNullable($nullable)
-    {
-        if (!is_bool($nullable)) {
-            throw new InvalidArgumentException('Only boolean values are allowed.');
-        }
-
-        $this->nullable = $nullable;
-    }
-
+    /**
+     * Returns true if this property's value can be set to null, false if it cannot.
+     *
+     * @return bool Whether or not this property's value can be set to null.
+     */
     public function isNullable() : bool
     {
-        return isset($this->nullable) ? $this->nullable : true;
+        return $this->nullable;
     }
 }

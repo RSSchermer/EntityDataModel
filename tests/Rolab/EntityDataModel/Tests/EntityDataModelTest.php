@@ -1,30 +1,22 @@
 <?php
 
-/*
- * This file is part of the Rolab Entity Data Model library.
- *
- * (c) Roland Schermer <roland0507@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types=1);
 
 namespace Rolab\EntityDataModel\Tests;
 
-use Rolab\EntityDataModel\Tests\EntityDataModelTestCase;
-
 use Rolab\EntityDataModel\EntityDataModel;
+use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
  * @covers EntityDataModel
  */
-class EntityDataModelTest extends EntityDataModelTestCase
+class EntityDataModelTest extends \PHPUnit_Framework_TestCase
 {
     public function testConstructor()
     {
-        $edm = new EntityDataModel('ModelURI', 'Fully.Qualified.Namespace');
+        $edm = new EntityDataModel('http://www.model.org', 'Fully.Qualified.Namespace');
 
-        $this->assertEquals('ModelURI', $edm->getUri());
+        $this->assertEquals('http://www.model.org', $edm->getUri());
         $this->assertEquals('Fully.Qualified.Namespace', $edm->getRealNamespace());
         $this->assertNull($edm->getNamespaceAlias());
         $this->assertEquals('Fully.Qualified.Namespace', $edm->getNamespace());
@@ -36,14 +28,14 @@ class EntityDataModelTest extends EntityDataModelTestCase
      * @dataProvider invalidNamespaceProvider
      * @expectedException InvalidArgumentException
      */
-    public function testExceptionOnInvalidNamespace($invalidNamespace)
+    public function testExceptionOnInvalidNamespace(string $invalidNamespace)
     {
-        new EntityDataModel('ModelURI', $invalidNamespace);
+        new EntityDataModel('http://www.model.org', $invalidNamespace);
     }
 
     public function testConstructorWithAlias()
     {
-        $edm = new EntityDataModel('ModelURI', 'Fully.Qualified.Namespace', 'Self');
+        $edm = new EntityDataModel('http://www.model.org', 'Fully.Qualified.Namespace', 'Self');
 
         $this->assertEquals('Self', $edm->getNamespace());
 
@@ -65,7 +57,7 @@ class EntityDataModelTest extends EntityDataModelTestCase
      * @depends testConstructor
      * @expectedException InvalidArgumentException
      */
-    public function testExceptionOnSetInvalidNamespaceAlias($invalidAlias, EntityDataModel $edm)
+    public function testExceptionOnSetInvalidNamespaceAlias(string $invalidAlias, EntityDataModel $edm)
     {
         $edm->setNamespaceAlias($invalidAlias);
     }
@@ -131,7 +123,7 @@ class EntityDataModelTest extends EntityDataModelTestCase
     /**
      * @depends testConstructorWithAlias
      */
-    public function testGetStructuralTypesInitiallyEmpty(EntityDataModel $edm)
+    public function testGetStructuredTypesInitiallyEmpty(EntityDataModel $edm)
     {
         $this->assertEmpty($edm->getStructuredTypes());
 
@@ -139,213 +131,74 @@ class EntityDataModelTest extends EntityDataModelTestCase
     }
 
     /**
-     * @depends testGetStructuralTypesInitiallyEmpty
+     * @depends testGetStructuredTypesInitiallyEmpty
      */
-    public function testAddStructuralType(EntityDataModel $edm)
+    public function testAddStructuredType(EntityDataModel $edm)
     {
-        $mockStructuralType = $this->buildStructuralTypeStub('SomeType', 'Some\Class');
+        $mockStructuredType = $this->buildStructuredTypeStub('SomeType', 'Some\Class');
 
-        $mockStructuralType->expects($this->once())
+        $mockStructuredType->expects($this->once())
             ->method('setEntityDataModel')
             ->with($this->equalTo($edm));
 
-        $edm->addStructuredType($mockStructuralType);
+        $edm->addStructuredType($mockStructuredType);
 
         $this->assertCount(1, $edm->getStructuredTypes());
-        $this->assertContains($mockStructuralType, $edm->getStructuredTypes());
+        $this->assertContains($mockStructuredType, $edm->getStructuredTypes());
 
         return $edm;
     }
 
     /**
-     * @depends testAddStructuralType
+     * @depends testAddStructuredType
      * @expectedException InvalidArgumentException
      */
-    public function testExceptionOnAddStructuralTypeWithSameName(EntityDataModel $edm)
+    public function testExceptionOnAddStructuredTypeWithSameName(EntityDataModel $edm)
     {
-        $edm->addStructuredType($this->buildStructuralTypeStub('SomeType', 'Some\Other\Class'));
+        $edm->addStructuredType($this->buildStructuredTypeStub('SomeType', 'Some\Other\Class'));
     }
 
     /**
-     * @depends testAddStructuralType
+     * @depends testAddStructuredType
      * @expectedException InvalidArgumentException
      */
-    public function testExceptionOnAddStructuralTypeWithSameClassName(EntityDataModel $edm)
+    public function testExceptionOnAddStructuredTypeWithSameClassName(EntityDataModel $edm)
     {
-        $edm->addStructuredType($this->buildStructuralTypeStub('SomeOtherType', 'Some\Class'));
+        $edm->addStructuredType($this->buildStructuredTypeStub('SomeOtherType', 'Some\Class'));
     }
 
     /**
-     * @depends testAddStructuralType
+     * @depends testAddStructuredType
      *
-     * I would actually like this to depend on testGetStructuralTypesInitiallyEmpty and get an empty
+     * I would actually like this to depend on testGetStructuredTypesInitiallyEmpty and get an empty
      * edm to start this test with. However, it seems that the state of the edm object returned by
-     * testGetStructuralTypesInitiallyEmpty gets altered by testAddStructuralType, even if it is not
+     * testGetStructuredTypesInitiallyEmpty gets altered by testAddStructuredType, even if it is not
      * part of the dependency hierarchy of this test, but rather on another branch.
      */
-    public function testGetStructuralTypeByName(EntityDataModel $edm)
+    public function testGetStructuredTypeByName(EntityDataModel $edm)
     {
-        $stucturalTypeStub = $this->buildStructuralTypeStub('SomeOtherType', 'Some\Other\Class');
+        $structuredTypeStub = $this->buildStructuredTypeStub('SomeOtherType', 'Some\Other\Class');
 
-        $edm->addStructuredType($stucturalTypeStub);
+        $edm->addStructuredType($structuredTypeStub);
 
-        $this->assertSame($stucturalTypeStub, $edm->getStructuredTypeByName('SomeOtherType'));
+        $this->assertSame($structuredTypeStub, $edm->getStructuredTypeByName('SomeOtherType'));
 
         return $edm;
     }
 
     /**
-     * @depends testGetStructuralTypeByName
+     * @depends testGetStructuredTypeByName
      */
-    public function testGetStructuralTypeByClassName(EntityDataModel $edm)
+    public function testGetStructuredTypeByClassName(EntityDataModel $edm)
     {
-        $stucturalTypeStub = $this->buildStructuralTypeStub('SomeThirdType', 'Some\Third\Class');
+        $structuredTypeStub = $this->buildStructuredTypeStub('SomeThirdType', 'Some\Third\Class');
 
-        $edm->addStructuredType($stucturalTypeStub);
+        $edm->addStructuredType($structuredTypeStub);
 
-        $this->assertSame($stucturalTypeStub, $edm->getStructuredTypeByClassName('Some\Third\Class'));
+        $this->assertSame($structuredTypeStub, $edm->getStructuredTypeByClassName('Some\Third\Class'));
     }
 
-    /**
-     * @depends testConstructorWithAlias
-     */
-    public function testGetAssociationsInitiallyEmpty(EntityDataModel $edm)
-    {
-        $this->assertEmpty($edm->getAssociations());
-
-        return $edm;
-    }
-
-    /**
-     * @depends testGetAssociationsInitiallyEmpty
-     */
-    public function testAddAssociation(EntityDataModel $edm)
-    {
-        $mockAssociation = $this->buildAssociationStub('SomeAssociation');
-
-        $mockAssociation->expects($this->once())
-            ->method('setEntityDataModel')
-            ->with($this->equalTo($edm));
-
-        $edm->addAssociation($mockAssociation);
-
-        $this->assertCount(1, $edm->getAssociations());
-        $this->assertContains($mockAssociation, $edm->getAssociations());
-
-        return $edm;
-    }
-
-    /**
-     * @depends testAddAssociation
-     * @expectedException InvalidArgumentException
-     */
-    public function testExceptionOnAddAssociationWithSameName(EntityDataModel $edm)
-    {
-        $edm->addAssociation($this->buildAssociationStub('SomeAssociation'));
-    }
-
-    /**
-     * @depends testAddAssociation
-     */
-    public function testGetAssociationByName(EntityDataModel $edm)
-    {
-        $associationStub = $this->buildAssociationStub('SomeOtherAssociation');
-
-        $edm->addAssociation($associationStub);
-
-        $this->assertSame($associationStub, $edm->getAssociationByName('SomeOtherAssociation'));
-    }
-
-    /**
-     * @depends testConstructorWithAlias
-     */
-    public function testGetEntityContainersInitiallyEmpty(EntityDataModel $edm)
-    {
-        $this->assertEmpty($edm->getEntityContainers());
-
-        return $edm;
-    }
-
-    /**
-     * @depends testGetEntityContainersInitiallyEmpty
-     */
-    public function testAddEntityContainer(EntityDataModel $edm)
-    {
-        $mockEntityContainer = $this->buildEntityContainerStub('SomeEntityContainer');
-
-        $mockEntityContainer->expects($this->once())
-            ->method('setEntityDataModel')
-            ->with($this->equalTo($edm));
-
-        $edm->addEntityContainer($mockEntityContainer);
-
-        $this->assertCount(1, $edm->getEntityContainers());
-        $this->assertContains($mockEntityContainer, $edm->getEntityContainers());
-
-        return $edm;
-    }
-
-    /**
-     * @depends testAddEntityContainer
-     * @expectedException InvalidArgumentException
-     */
-    public function testExceptionOnAddEntityContainerWithSameName(EntityDataModel $edm)
-    {
-        $edm->addEntityContainer($this->buildEntityContainerStub('SomeEntityContainer'));
-    }
-
-    /**
-     * @depends testAddEntityContainer
-     */
-    public function testGetEntityContainerByName(EntityDataModel $edm)
-    {
-        $entityContainerStub = $this->buildEntityContainerStub('SomeOtherEntityContainer');
-
-        $edm->addEntityContainer($entityContainerStub);
-
-        $this->assertSame($entityContainerStub, $edm->getEntityContainerByName('SomeOtherEntityContainer'));
-    }
-
-    /**
-     * @depends testConstructor
-     */
-    public function testGetDefaultEntityContainerInitiallyNull(EntityDataModel $edm)
-    {
-        $this->assertNull($edm->getDefaultEntityContainer());
-
-        return $edm;
-    }
-
-    /**
-     * @depends testGetDefaultEntityContainerInitiallyNull
-     */
-    public function testSetDefaultEntityContainer(EntityDataModel $edm)
-    {
-        $entityContainerStub = $this->buildEntityContainerStub('SomeEntityContainer');
-        $otherEntityContainerStub = $this->buildEntityContainerStub('SomeOtherEntityContainer');
-
-        $edm->addEntityContainer($entityContainerStub);
-        $edm->addEntityContainer($otherEntityContainerStub);
-
-        $this->assertSame($entityContainerStub, $edm->getDefaultEntityContainer());
-
-        $edm->setDefaultEntityContainer('SomeOtherEntityContainer');
-
-        $this->assertSame($otherEntityContainerStub, $edm->getDefaultEntityContainer());
-
-        return $edm;
-    }
-
-    /**
-     * @depends testSetDefaultEntityContainer
-     * @expectedException InvalidArgumentException
-     */
-    public function testExceptionOnSetDefaultEntityContainerWithNonExistantName(EntityDataModel $edm)
-    {
-        $edm->setDefaultEntityContainer('NonExistantName');
-    }
-
-    public function testFindStructuralTypeByFullName()
+    public function testFindStructuredTypeByFullName()
     {
         $edm = new EntityDataModel('ModelURI', 'Fully.Qualified.Namespace', 'Self');
 
@@ -353,68 +206,20 @@ class EntityDataModelTest extends EntityDataModelTestCase
 
         $edm->addReferencedModel($referencedModel, 'Referenced');
 
-        $stucturalTypeStubInMainModel = $this->buildStructuralTypeStub('MainModelType', 'Some\Class');
-        $stucturalTypeStubInReferencedModel = $this->buildStructuralTypeStub('ReferencedModelType', 'Some\Other\Class');
+        $stucturalTypeStubInMainModel = $this->buildStructuredTypeStub('MainModelType', 'Some\Class');
+        $stucturalTypeStubInReferencedModel = $this->buildStructuredTypeStub('ReferencedModelType', 'Some\Other\Class');
 
         $edm->addStructuredType($stucturalTypeStubInMainModel);
         $referencedModel->addStructuredType($stucturalTypeStubInReferencedModel);
 
         $this->assertNull($edm->findStructuredTypeByFullName('NonExistantName'));
-        $this->assertSame($stucturalTypeStubInMainModel, $edm->findStructuredTypeByFullName(
-            'Self.MainModelType'));
-        $this->assertSame($stucturalTypeStubInMainModel, $edm->findStructuredTypeByFullName(
-            'MainModelType'));
-        $this->assertNull($edm->findAssociationByFullName('ReferencedModelType'));
-        $this->assertSame($stucturalTypeStubInReferencedModel, $edm->findStructuredTypeByFullName(
-            'Referenced.ReferencedModelType'));
-    }
-
-    public function testFindAssociationByFullName()
-    {
-        $edm = new EntityDataModel('ModelURI', 'Fully.Qualified.Namespace', 'Self');
-
-        $referencedModel = new EntityDataModel('ReferencedModelURI', 'Referenced.Namespace');
-
-        $edm->addReferencedModel($referencedModel, 'Referenced');
-
-        $associationStubInMainModel = $this->buildAssociationStub('MainModelAssociation');
-        $associationStubInReferencedModel = $this->buildAssociationStub('ReferencedModelAssociation');
-
-        $edm->addAssociation($associationStubInMainModel);
-        $referencedModel->addAssociation($associationStubInReferencedModel);
-
-        $this->assertNull($edm->findAssociationByFullName('NonExistantName'));
-        $this->assertSame($associationStubInMainModel, $edm->findAssociationByFullName(
-            'Self.MainModelAssociation'));
-        $this->assertSame($associationStubInMainModel, $edm->findAssociationByFullName(
-            'MainModelAssociation'));
-        $this->assertNull($edm->findAssociationByFullName('ReferencedModelAssociation'));
-        $this->assertSame($associationStubInReferencedModel, $edm->findAssociationByFullName(
-            'Referenced.ReferencedModelAssociation'));
-    }
-
-    public function testFindEntityContainerByFullName()
-    {
-        $edm = new EntityDataModel('ModelURI', 'Fully.Qualified.Namespace', 'Self');
-
-        $referencedModel = new EntityDataModel('ReferencedModelURI', 'Referenced.Namespace');
-
-        $edm->addReferencedModel($referencedModel, 'Referenced');
-
-        $entityContainerStubInMainModel = $this->buildEntityContainerStub('MainModelEntityContainer');
-        $entityContainerStubInReferencedModel = $this->buildEntityContainerStub('ReferencedModelEntityContainer');
-
-        $edm->addEntityContainer($entityContainerStubInMainModel);
-        $referencedModel->addEntityContainer($entityContainerStubInReferencedModel);
-
-        $this->assertNull($edm->findEntityContainerByFullName('NonExistantName'));
-        $this->assertSame($entityContainerStubInMainModel, $edm->findEntityContainerByFullName(
-            'Self.MainModelEntityContainer'));
-        $this->assertSame($entityContainerStubInMainModel, $edm->findEntityContainerByFullName(
-            'MainModelEntityContainer'));
-        $this->assertNull($edm->findEntityContainerByFullName('ReferencedModelEntityContainer'));
-        $this->assertSame($entityContainerStubInReferencedModel, $edm->findEntityContainerByFullName(
-            'Referenced.ReferencedModelEntityContainer'));
+        $this->assertSame($stucturalTypeStubInMainModel, $edm->findStructuredTypeByFullName('Self.MainModelType'));
+        $this->assertSame($stucturalTypeStubInMainModel, $edm->findStructuredTypeByFullName('MainModelType'));
+        $this->assertNull($edm->findStructuredTypeByFullName('ReferencedModelType'));
+        $this->assertSame(
+            $stucturalTypeStubInReferencedModel,
+            $edm->findStructuredTypeByFullName('Referenced.ReferencedModelType')
+        );
     }
 
     public function invalidNamespaceProvider()
@@ -426,49 +231,16 @@ class EntityDataModelTest extends EntityDataModelTestCase
         );
     }
 
-    protected function buildStructuralTypeStub($name, $className)
+    protected function buildStructuredTypeStub($name, $className)
     {
-        $structuralTypeStub = $this->getMockBuilder('Rolab\EntityDataModel\Type\StructuralType')
+        $structuredTypeStub = $this->getMockBuilder('Rolab\EntityDataModel\Type\StructuredType')
             ->disableOriginalConstructor()
             ->setMethods(array('setEntityDataModel', 'getName', 'getClassName'))
             ->getMockForAbstractClass();
 
-        $structuralTypeStub->expects($this->any())
-            ->method('getName')
-            ->will($this->returnValue($name));
+        $structuredTypeStub->method('getName')->willReturn($name);
+        $structuredTypeStub->method('getClassName')->willReturn($className);
 
-        $structuralTypeStub->expects($this->any())
-            ->method('getClassName')
-            ->will($this->returnValue($className));
-
-        return $structuralTypeStub;
-    }
-
-    protected function buildAssociationStub($name)
-    {
-        $associationStub = $this->getMockBuilder('Rolab\EntityDataModel\Association')
-            ->disableOriginalConstructor()
-            ->setMethods(array('setEntityDataModel', 'getName'))
-            ->getMock();
-
-        $associationStub->expects($this->any())
-            ->method('getName')
-            ->will($this->returnValue($name));
-
-        return $associationStub;
-    }
-
-    protected function buildEntityContainerStub($name)
-    {
-        $entityContainerStub = $this->getMockBuilder('Rolab\EntityDataModel\EntityContainer')
-            ->disableOriginalConstructor()
-            ->setMethods(array('setEntityDataModel', 'getName'))
-            ->getMock();
-
-        $entityContainerStub->expects($this->any())
-            ->method('getName')
-            ->will($this->returnValue($name));
-
-        return $entityContainerStub;
+        return $structuredTypeStub;
     }
 }

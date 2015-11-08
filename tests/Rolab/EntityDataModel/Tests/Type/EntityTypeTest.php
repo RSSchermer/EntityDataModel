@@ -1,64 +1,52 @@
 <?php
 
-/*
- * This file is part of the Rolab Entity Data Model library.
- *
- * (c) Roland Schermer <roland0507@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types=1);
 
 namespace Rolab\EntityDataModel\Tests\Type;
 
-use Rolab\EntityDataModel\Tests\EntityDataModelTestCase;
-
 use Rolab\EntityDataModel\Type\EntityType;
+use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
  * @covers EntityType
  */
-class EntityTypeTest extends EntityDataModelTestCase
+class EntityTypeTest extends ComplexTypeTestCase
 {
-    protected $personReflectionClassFixture;
+    protected $customerReflectionClassFixture;
 
     protected function setUp()
     {
-        $this->personReflectionClassFixture = new \ReflectionClass('Rolab\EntityDataModel\Tests\Fixtures\Person');
+        $this->customerReflectionClassFixture = new \ReflectionClass('Rolab\EntityDataModel\Tests\Fixtures\Customer');
     }
 
     public function testConstructor()
     {
-        $keyPropertyDescription = $this->buildKeyPropertyDescriptionStub('IdNumber');
+        $keyPropertyDescription = $this->buildKeyPropertyDescriptionStub('Id');
         $structuralPropertyDescription = $this->buildStructuralPropertyDescriptionStub('Name');
         $ETagPropertyDescription = $this->buildETagPropertyDescriptionStub('LastChange');
-        $navigationPropertyDescription = $this->buildNavigationPropertyDescriptionStub('Car');
 
-        $entityType = new EntityType('PersonType', $this->personReflectionClassFixture, array(
+        $entityType = new EntityType('Customer', $this->customerReflectionClassFixture, array(
             $keyPropertyDescription,
             $structuralPropertyDescription,
             $ETagPropertyDescription,
-            $navigationPropertyDescription,
         ));
 
-        $this->assertEquals('PersonType', $entityType->getName());
-        $this->assertSame($this->personReflectionClassFixture, $entityType->getReflection());
-        $this->assertEquals('Rolab\EntityDataModel\Tests\Fixtures\Person', $entityType->getClassName());
+        $this->assertEquals('Customer', $entityType->getName());
+        $this->assertSame($this->customerReflectionClassFixture, $entityType->getReflection());
+        $this->assertEquals('Rolab\EntityDataModel\Tests\Fixtures\Customer', $entityType->getClassName());
         $this->assertCount(4, $entityType->getPropertyDescriptions());
         $this->assertCount(3, $entityType->getStructuralPropertyDescriptions());
         $this->assertCount(1, $entityType->getKeyPropertyDescriptions());
         $this->assertCount(1, $entityType->getETagPropertyDescriptions());
-        $this->assertCount(1, $entityType->getNavigationPropertyDescriptions());
+        $this->assertCount(0, $entityType->getNavigationPropertyDescriptions());
         $this->assertContains($keyPropertyDescription, $entityType->getPropertyDescriptions());
         $this->assertContains($structuralPropertyDescription, $entityType->getPropertyDescriptions());
         $this->assertContains($ETagPropertyDescription, $entityType->getPropertyDescriptions());
-        $this->assertContains($navigationPropertyDescription, $entityType->getPropertyDescriptions());
         $this->assertContains($keyPropertyDescription, $entityType->getKeyPropertyDescriptions());
         $this->assertContains($structuralPropertyDescription, $entityType->getStructuralPropertyDescriptions());
         $this->assertContains($keyPropertyDescription, $entityType->getStructuralPropertyDescriptions());
         $this->assertContains($ETagPropertyDescription, $entityType->getStructuralPropertyDescriptions());
         $this->assertContains($ETagPropertyDescription, $entityType->getETagPropertyDescriptions());
-        $this->assertContains($navigationPropertyDescription, $entityType->getNavigationPropertyDescriptions());
 
         return $entityType;
     }
@@ -70,8 +58,12 @@ class EntityTypeTest extends EntityDataModelTestCase
     {
         $additionalPropertyDescription = $this->buildStructuralPropertyDescriptionStub('AdditionalProperty');
 
-        $childEntityType = new EntityType('ChildType', $this->personReflectionClassFixture,
-            array($additionalPropertyDescription), $parentEntityType);
+        $childEntityType = new EntityType(
+            'ChildType',
+            $this->customerReflectionClassFixture,
+            array($additionalPropertyDescription),
+            $parentEntityType
+        );
 
         $this->assertCount(5, $childEntityType->getPropertyDescriptions());
         $this->assertCount(4, $childEntityType->getStructuralPropertyDescriptions());
@@ -87,8 +79,11 @@ class EntityTypeTest extends EntityDataModelTestCase
     {
         $structuralPropertyDescription = $this->buildStructuralPropertyDescriptionStub('AdditionalProperty');
 
-        $childEntityType = new EntityType('PersonType', $this->personReflectionClassFixture,
-            array($structuralPropertyDescription));
+        new EntityType(
+            'Customer',
+            $this->customerReflectionClassFixture,
+            array($structuralPropertyDescription)
+        );
     }
 
     /**
@@ -99,14 +94,42 @@ class EntityTypeTest extends EntityDataModelTestCase
     {
         $keyPropertyDescription = $this->buildKeyPropertyDescriptionStub('AdditionalKeyProperty');
 
-        $childEntityType = new EntityType('PersonType', $this->personReflectionClassFixture,
-            array($keyPropertyDescription), $parentEntityType);
+        new EntityType(
+            'Customer',
+            $this->customerReflectionClassFixture,
+            array($keyPropertyDescription),
+            $parentEntityType
+        );
     }
 
     /**
      * @depends testConstructor
      */
-    public function testAddPropertyDescriptionWithStructuralPropertyDescription(EntityType $entityType)
+    public function testIsSubTypeOf(EntityType $parentEntityType) {
+        $additionalPropertyDescription = $this->buildStructuralPropertyDescriptionStub('AdditionalProperty');
+
+        $childEntityType = new EntityType(
+            'ChildType',
+            $this->customerReflectionClassFixture,
+            array($additionalPropertyDescription),
+            $parentEntityType
+        );
+
+        $otherEntityType = new EntityType(
+            'OtherType',
+            $this->customerReflectionClassFixture,
+            array($this->buildKeyPropertyDescriptionStub('Key'))
+        );
+
+        $this->assertTrue($childEntityType->isSubTypeOf($childEntityType));
+        $this->assertTrue($childEntityType->isSubTypeOf($parentEntityType));
+        $this->assertFalse($childEntityType->isSubTypeOf($otherEntityType));
+    }
+
+    /**
+     * @depends testConstructor
+     */
+    public function testAddStructuralPropertyDescriptionWithStructuralPropertyDescription(EntityType $entityType)
     {
         $structuralPropertyDescription = $this->buildStructuralPropertyDescriptionStub('Structural');
 
@@ -122,7 +145,23 @@ class EntityTypeTest extends EntityDataModelTestCase
     /**
      * @depends testConstructor
      */
-    public function testAddPropertyDescriptionWithETagPropertyDescription(EntityType $entityType)
+    public function testAddStructuralPropertyDescriptionWithKeyPropertyDescription(EntityType $entityType)
+    {
+        $keyPropertyDescription = $this->buildKeyPropertyDescriptionStub('Key');
+
+        $entityType->addStructuralPropertyDescription($keyPropertyDescription);
+
+        $this->assertContains($keyPropertyDescription, $entityType->getPropertyDescriptions());
+        $this->assertContains($keyPropertyDescription, $entityType->getStructuralPropertyDescriptions());
+        $this->assertContains($keyPropertyDescription, $entityType->getKeyPropertyDescriptions());
+        $this->assertNotContains($keyPropertyDescription, $entityType->getETagPropertyDescriptions());
+        $this->assertNotContains($keyPropertyDescription, $entityType->getNavigationPropertyDescriptions());
+    }
+
+    /**
+     * @depends testConstructor
+     */
+    public function testAddStructuralPropertyDescriptionWithETagPropertyDescription(EntityType $entityType)
     {
         $eTagPropertyDescription = $this->buildETagPropertyDescriptionStub('ETag');
 
@@ -138,11 +177,11 @@ class EntityTypeTest extends EntityDataModelTestCase
     /**
      * @depends testConstructor
      */
-    public function testAddPropertyDescriptionWithNavigationPropertyDescription(EntityType $entityType)
+    public function testAddNavigationPropertyDescription(EntityType $entityType)
     {
         $navigationPropertyDescription = $this->buildNavigationPropertyDescriptionStub('Navigation');
 
-        $entityType->addStructuralPropertyDescription($navigationPropertyDescription);
+        $entityType->addNavigationPropertyDescription($navigationPropertyDescription);
 
         $this->assertContains($navigationPropertyDescription, $entityType->getPropertyDescriptions());
         $this->assertNotContains($navigationPropertyDescription, $entityType->getStructuralPropertyDescriptions());
@@ -155,96 +194,43 @@ class EntityTypeTest extends EntityDataModelTestCase
      * @depends testConstructor
      * @expectedException InvalidArgumentException
      */
-    public function testExceptionOnAddPropertyDescriptionWithExistingName(EntityType $entityType)
+    public function testExceptionOnAddNavigationPropertyDescriptionWithExistingName(EntityType $entityType)
     {
         $navigationPropertyDescription = $this->buildNavigationPropertyDescriptionStub('Name');
 
-        $entityType->addStructuralPropertyDescription($navigationPropertyDescription);
+        $entityType->addNavigationPropertyDescription($navigationPropertyDescription);
     }
 
-    /**
-     * @depends testConstructor
-     * @expectedException InvalidArgumentException
-     */
-    public function testExceptionOnAddKeyPropertyDescription(EntityType $entityType)
+    protected function buildPrimitivePropertyDescriptionStub($name, $key = false, $eTag = false)
     {
-        $keyPropertyDescription = $this->buildKeyPropertyDescriptionStub('Key');
+        $propertyDescriptionStub = $this->getMockBuilder('Rolab\EntityDataModel\Type\PrimitivePropertyDescription')
+            ->disableOriginalConstructor()
+            ->getMockForAbstractClass();
 
-        $entityType->addStructuralPropertyDescription($keyPropertyDescription);
-    }
+        $propertyDescriptionStub->method('getName')->willReturn($name);
+        $propertyDescriptionStub->method('isPartOfKey')->willReturn($key);
+        $propertyDescriptionStub->method('isPartOfETag')->willReturn($eTag);
 
-    /**
-     * @depends testConstructor
-     */
-    public function testRemovePropertyDescriptionForStructuralPropertyDescription(EntityType $entityType)
-    {
-        $this->assertNotEmpty($entityType->getPropertyDescriptionByName('Name'));
-
-        $count = count($entityType->getStructuralPropertyDescriptions());
-        $entityType->removePropertyDescription('Name');
-
-        $this->assertEmpty($entityType->getPropertyDescriptionByName('Name'));
-        $this->assertCount($count - 1, $entityType->getStructuralPropertyDescriptions());
-    }
-
-    /**
-     * @depends testConstructor
-     */
-    public function testRemovePropertyDescriptionForETagPropertyDescription(EntityType $entityType)
-    {
-        $this->assertNotEmpty($entityType->getPropertyDescriptionByName('LastChange'));
-
-        $count = count($entityType->getETagPropertyDescriptions());
-        $entityType->removePropertyDescription('LastChange');
-
-        $this->assertEmpty($entityType->getPropertyDescriptionByName('LastChange'));
-        $this->assertCount($count - 1, $entityType->getETagPropertyDescriptions());
-    }
-
-    /**
-     * @depends testConstructor
-     */
-    public function testRemovePropertyDescriptionForNavigationPropertyDescription(EntityType $entityType)
-    {
-        $this->assertNotEmpty($entityType->getPropertyDescriptionByName('Car'));
-
-        $count = count($entityType->getNavigationPropertyDescriptions());
-        $entityType->removePropertyDescription('Car');
-
-        $this->assertEmpty($entityType->getPropertyDescriptionByName('Car'));
-        $this->assertCount($count - 1, $entityType->getNavigationPropertyDescriptions());
+        return $propertyDescriptionStub;
     }
 
     protected function buildKeyPropertyDescriptionStub($name)
     {
-        return $this->buildPropertyDescriptionStub($name, 'Rolab\EntityDataModel\Type\KeyPropertyDescription');
+        return $this->buildPrimitivePropertyDescriptionStub($name, true);
     }
 
     protected function buildETagPropertyDescriptionStub($name)
     {
-        return $this->buildPropertyDescriptionStub($name, 'Rolab\EntityDataModel\Type\ETagPropertyDescription');
+        return $this->buildPrimitivePropertyDescriptionStub($name, false, true);
     }
 
     protected function buildNavigationPropertyDescriptionStub($name)
     {
-        return $this->buildPropertyDescriptionStub($name, 'Rolab\EntityDataModel\Type\NavigationPropertyDescription');
-    }
-
-    protected function buildStructuralPropertyDescriptionStub($name)
-    {
-        return $this->buildPropertyDescriptionStub($name, 'Rolab\EntityDataModel\Type\StructuralPropertyDescription');
-    }
-
-    protected function buildPropertyDescriptionStub($name, $className)
-    {
-        $propertyDescriptionStub = $this->getMockBuilder($className)
+        $propertyDescriptionStub = $this->getMockBuilder('Rolab\EntityDataModel\Type\NavigationPropertyDescription')
             ->disableOriginalConstructor()
-            ->setMethods(array('getName'))
             ->getMockForAbstractClass();
 
-        $propertyDescriptionStub->expects($this->any())
-            ->method('getName')
-            ->will($this->returnValue($name));
+        $propertyDescriptionStub->method('getName')->willReturn($name);
 
         return $propertyDescriptionStub;
     }

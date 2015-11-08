@@ -11,13 +11,11 @@
 
 namespace Rolab\EntityDataModel\Tests\Fixtures;
 
-class Person
+class Order
 {
-    private $idNumber;
+    private $id;
 
-    private $name;
+    private $date;
 
-    private $adress;
-
-    private $car;
+    private $amount;
 }

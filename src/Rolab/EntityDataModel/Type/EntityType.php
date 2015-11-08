@@ -7,8 +7,18 @@ namespace Rolab\EntityDataModel\Type;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
- * Represents an entity type: a complex data type that is uniquely identifiable through
- * a key property or a combination of several partial key properties.
+ * Represents an entity type.
+ *
+ * Entity types are structured types, for which one or more structural
+ * properties define a key by which instances of this entity type can be
+ * uniquely referenced. An entity type must either define one or more key
+ * properties itself, or may inherit key properties from a base entity type.
+ * An example would be a "Customer" type which, among other structural
+ * properties, defines an "Id" property by which a customer instance is
+ * uniquely identifiable.
+ *
+ * Apart from structural properties, an entity type can also define
+ * navigation properties to specify relationships with other entity types.
  * 
  * @author Roland Schermer <roland0507@gmail.com>
  */
@@ -18,48 +28,36 @@ class EntityType extends ComplexType
      * @var NavigationPropertyDescription[]
      */
     private $navigationPropertyDescriptions = array();
-    
+
     /**
-     * @var KeyPropertyDescription[]
+     * @var PrimitivePropertyDescription[]
      */
     private $keyPropertyDescriptions = array();
-    
+
     /**
-     * @var ETagPropertyDescription[]
+     * @var PrimitivePropertyDescription[]
      */
     private $eTagPropertyDescriptions = array();
-    
+
     /**
      * @var EntityType
      */
     private $baseType;
-    
-    /**
-     * @var boolean
-     */
-    private $isAbstract;
-    
-    /**
-     * @var boolean
-     */
-    private $constructionCompleted = false;
 
     /**
      * Creates a new entity type.
      *
-     * @param string                           $name                           The name of the complex type (may only
-     *                                                                         contain alphanumeric characters and the
-     *                                                                         underscore).
-     * @param \ReflectionClass                 $reflection                     Reflection of the class this structural
-     *                                                                         type maps to.
-     * @param StructuralPropertyDescription[]  $structuralPropertyDescriptions Descriptions for each of the structural
-     *                                                                         properties.
-     * @param NavigationPropertyDescription[]  $navigationPropertyDescriptions Descriptions for each of the navigation
-     *                                                                         properties.
-     * @param EntityType                       $baseType                       A base type this entity type extends and
-     *                                                                         inherits all properties from.
-     * @param bool                             $isAbstract                     Whether or not this entity type can be
-     *                                                                         instantiated.
+     * @param string $name                                                    The name of the complex type (may only
+     *                                                                        contain alphanumeric characters and the
+     *                                                                        underscore).
+     * @param \ReflectionClass $reflection                                    Reflection of the class this structural
+     *                                                                        type maps to.
+     * @param StructuralPropertyDescription[] $structuralPropertyDescriptions Descriptions for each of the structural
+     *                                                                        properties.
+     * @param NavigationPropertyDescription[] $navigationPropertyDescriptions Descriptions for each of the navigation
+     *                                                                        properties.
+     * @param EntityType $baseType                                            A base type this entity type extends and
+     *                                                                        inherits all properties from.
      *
      * @throws InvalidArgumentException Thrown if the name contains illegal characters.
      *                                  Thrown if the property description list is empty.
@@ -69,52 +67,75 @@ class EntityType extends ComplexType
         string $name,
         \ReflectionClass $reflection,
         array $structuralPropertyDescriptions,
-        array $navigationPropertyDescriptions = array(),
-        EntityType $baseType = null,
-        bool $isAbstract = false
+        EntityType $baseType = null
     ) {
         parent::__construct($name, $reflection, $structuralPropertyDescriptions);
 
         if (empty($this->keyPropertyDescriptions) && null === $baseType) {
             throw new InvalidArgumentException(sprintf(
-                'Entity type "%s" must be given either at least one KeyPropertyDescription or a base entity type.',
+                'Tried to define entity type "%s" without at least one key property and without a base entity type. ' .
+                'An entity type must be defined with either at least one key property or a base entity type.',
                 $this->getFullName()
             ));
         } elseif (count($this->keyPropertyDescriptions) > 0 && null !== $baseType) {
             throw new InvalidArgumentException(sprintf(
-                'Entity type "%s" may be given either a base entity type or one or more KeyPropertyDescriptions, ' .
-                'but it may not be given both a base type and KeyPropertyDescriptions.',
+                'Tried to define entity type "%s" with both a base entity type and one or more key properties. ' .
+                'An entity type may either be defined with a base entity type or with one or more key properties, ' .
+                'not both.',
                 $this->getFullName()
             ));
         }
 
-        foreach ($navigationPropertyDescriptions as $propertyDescription) {
-            $this->addNavigationPropertyDescription($propertyDescription);
-        }
-
         $this->baseType = $baseType;
-        $this->isAbstract = false;
-        $this->constructionCompleted = true;
     }
-    
+
     /**
      * Returns the base type this entity type extends and inherits all properties from.
-     * 
+     *
      * @return EntityType The base type this entity type extends.
      */
-    public function getBaseType() : EntityType
+    public function getBaseType()
     {
         return $this->baseType;
     }
+
+    /**
+     * Returns whether or not this entity type is a subtype of the given entity type.
+     *
+     * This also returns true when given entity type is the same type as this entity type.
+     *
+     * @param EntityType $entityType The entity type for which to check if this entity type
+     *                               is a subtype.
+     *
+     * @return bool Whether or not this entity type is a subtype of the given entity type.
+     */
+    public function isSubTypeOf(EntityType $entityType) : bool
+    {
+        if ($this === $entityType) {
+            return true;
+        }
+
+        $parent = $this->getBaseType();
+
+        while ($parent) {
+            if ($parent === $entityType) {
+                return true;
+            }
+
+            $parent = $parent->getBaseType();
+        }
+
+        return false;
+    }
     
     /**
-     * Returns whether or not this entity type can be instantiated.
+     * Returns true if this entity type can be instantiated, false if it cannot.
      * 
      * @return boolean Whether or not this entity type can be instantiated.
      */
     public function isAbstract() : bool
     {
-        return $this->isAbstract;
+        return $this->getReflection()->isAbstract();
     }
     
     /**
@@ -122,32 +143,39 @@ class EntityType extends ComplexType
      */
     public function addStructuralPropertyDescription(StructuralPropertyDescription $propertyDescription)
     {
-        if ($this->constructionCompleted && $propertyDescription instanceof KeyPropertyDescription) {
-            throw new InvalidArgumentException(sprintf(
-                'Cannot add key properties after the initial construction of the entity type.',
-                $this->getFullName(),
-                $propertyDescription->getName()
-            ));
-        }
-
         parent::addStructuralPropertyDescription($propertyDescription);
 
-        if ($propertyDescription instanceof KeyPropertyDescription) {
-            $this->keyPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
-        }
+        if ($propertyDescription instanceof PrimitivePropertyDescription) {
+            if ($propertyDescription->isPartOfKey()) {
+                $this->keyPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
+            }
 
-        if ($propertyDescription instanceof ETagPropertyDescription) {
-            $this->eTagPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
+            if ($propertyDescription->isPartOfETag()) {
+                $this->eTagPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
+            }
         }
     }
 
+    /**
+     * Adds a navigation property description to the complex type.
+     *
+     * Adds a navigation property description to the complex type. No two properties on the same
+     * complex type may have the same name.
+     *
+     * @param NavigationPropertyDescription $propertyDescription The property description to
+     *                                                           be added to the complex type.
+     *
+     * @throws InvalidArgumentException Thrown if the complex type already has a property with
+     *                                  the same name.
+     */
     public function addNavigationPropertyDescription(NavigationPropertyDescription $propertyDescription)
     {
-        if (isset($propertyDescriptions[$propertyDescription->getName()])) {
+        if (isset($this->getPropertyDescriptions()[$propertyDescription->getName()])) {
             throw new InvalidArgumentException(sprintf(
-                'Type "%s" already has a property named "%s"',
-                $this->getFullName(),
-                $propertyDescription->getName()
+                'Tried to add navigation property "%s" to entity type "%s", but this entity type already has a ' .
+                'property with this name. The names of the properties defined on a structured type must be unique.',
+                $propertyDescription->getName(),
+                $this->getFullName()
             ));
         }
 
@@ -164,7 +192,7 @@ class EntityType extends ComplexType
     }
 
     /**
-     * Returns whether or not this entity type has any e-tag properties.
+     * Returns true if this entity type has one or more e-tag properties, false if it does not.
      *
      * @return bool Whether or not this entity type has any e-tag properties.
      */
@@ -176,7 +204,7 @@ class EntityType extends ComplexType
     /**
      * Returns all key property descriptions for this entity type.
      * 
-     * @return KeyPropertyDescription[] All key property descriptions for this entity type.
+     * @return PrimitivePropertyDescription[] All key property descriptions for this entity type.
      */
     public function getKeyPropertyDescriptions() : array
     {
@@ -188,9 +216,9 @@ class EntityType extends ComplexType
     }
     
     /**
-     * Returns all e-tag property descriptions for this entity type.
+     * Returns all E-tag property descriptions for this entity type.
      * 
-     * @return ETagPropertyDescription[] All e-tag property descriptions for this entity type.
+     * @return PrimitivePropertyDescription[] All E-tag property descriptions for this entity type.
      */
     public function getETagPropertyDescriptions() : array
     {
@@ -200,7 +228,7 @@ class EntityType extends ComplexType
 
         return $this->eTagPropertyDescriptions;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -209,11 +237,11 @@ class EntityType extends ComplexType
         if(isset($this->baseType)) {
             return array_merge(
                 $this->baseType->getStructuralPropertyDescriptions(),
-                parent::getStructuralPropertyDescriptions()
+                parent::getPropertyDescriptions()
             );
         }
 
-        return parent::getStructuralPropertyDescriptions();
+        return parent::getPropertyDescriptions();
     }
     
     /**

@@ -8,9 +8,8 @@ use Rolab\EntityDataModel\Type\StructuredType;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
- * Representation of an entity data model. The entity data model consists of
- * structured types, associations and entity containers. It should be uniquely
- * identified by a URI.
+ * Representation of an entity data model. The entity data model defines a
+ * collection of structured types. It should be uniquely identifiable by a URI.
  *
  * @author Roland Schermer <roland0507@gmail.com>
  */
@@ -59,7 +58,7 @@ class EntityDataModel
      * @throws InvalidArgumentException Thrown if the real namespace contains illegal characters or
      *                                  if the namespace alias contains illegal characters.
      */
-    public function __construct(string $uri, string $realNamespace, $namespaceAlias = null)
+    public function __construct(string $uri, string $realNamespace, string $namespaceAlias = null)
     {
         $this->uri = $uri;
 
@@ -72,7 +71,10 @@ class EntityDataModel
         }
 
         $this->realNamespace = $realNamespace;
-        $this->setNamespaceAlias($namespaceAlias);
+
+        if (null !== $namespaceAlias) {
+            $this->setNamespaceAlias($namespaceAlias);
+        }
     }
 
     /**
@@ -132,9 +134,9 @@ class EntityDataModel
      *
      * @throws InvalidArgumentException Thrown if the namespace alias contains illegal characters.
      */
-    public function setNamespaceAlias($namespaceAlias)
+    public function setNamespaceAlias(string $namespaceAlias)
     {
-        if (null !== $namespaceAlias && !preg_match('/^[A-Za-z0-9_\.]+$/', $namespaceAlias)) {
+        if (!preg_match('/^[A-Za-z0-9_\.]+$/', $namespaceAlias)) {
             throw new InvalidArgumentException(sprintf(
                 '"%s" is an illegal namespace alias for an entity data model. The namespace alias for an entity ' .
                 'data model may only contain alphanumeric characters, underscores and dots.',
@@ -170,7 +172,7 @@ class EntityDataModel
      *                                  for the referenced model is the same as the namespace (alias)
      *                                  of another referenced model of the current entity data model.
      */
-    public function addReferencedModel(EntityDataModel $referencedModel, $namespaceAlias = null)
+    public function addReferencedModel(EntityDataModel $referencedModel, string $namespaceAlias = null)
     {
         if (isset($namespaceAlias)) {
             $referencedModel->setNamespaceAlias($namespaceAlias);
@@ -210,7 +212,7 @@ class EntityDataModel
      * @return null|EntityDataModel Returns the referenced entity data model if a match was
      *                              found for the namespace or null.
      */
-    public function getReferencedModelByNamespace($namespace)
+    public function getReferencedModelByNamespace(string $namespace)
     {
         return isset($this->referencedModels[$namespace]) ? $this->referencedModels[$namespace] : null;
     }
@@ -233,15 +235,21 @@ class EntityDataModel
     {
         if (isset($this->structuredTypes[$structuredType->getName()])) {
             throw new InvalidArgumentException(sprintf(
-                'The entity data model already has a type by the name "%s".',
-                $structuredType->getName()
+                'Tried to add a structured type named "%s" to entity data model "%s", but a structured type with ' .
+                'with the same name already exists in this model. Structured type names must be unique within an ' .
+                'entity data model.',
+                $structuredType->getName(),
+                $this->getRealNamespace()
             ));
         }
 
         if (isset($this->structuredTypesByClassName[$structuredType->getClassName()])) {
             throw new InvalidArgumentException(sprintf(
-                'The entity data model already has a type of class "%s".',
-                $structuredType->getClassName()
+                'Tried to add a structured type of class "%s" to entity data model "%s", but a structured type with ' .
+                'of the same class already exists in this model. Structured type classes must be unique within an ' .
+                'entity data model.',
+                $structuredType->getName(),
+                $this->getRealNamespace()
             ));
         }
 
@@ -285,7 +293,7 @@ class EntityDataModel
      *                                                      the search based on a namespace
      *                                                      prefix.
      */
-    public function getStructuredTypeByName($name)
+    public function getStructuredTypeByName(string $name)
     {
         return isset($this->structuredTypes[$name]) ? $this->structuredTypes[$name] : null;
     }
@@ -306,7 +314,7 @@ class EntityDataModel
      *                             the class was found in the entity data model or null if
      *                             no such structured type was found.
      */
-    public function getStructuredTypeByClassName($className)
+    public function getStructuredTypeByClassName(string $className)
     {
         if (isset($this->structuredTypesByClassName[$className])) {
             return $this->structuredTypesByClassName[$className];
@@ -332,7 +340,7 @@ class EntityDataModel
      * @return null|StructuredType The structured type with the name searched for or null
      *                             if no structured type with that name could be found.
      */
-    public function findStructuredTypeByFullName($fullName)
+    public function findStructuredTypeByFullName(string $fullName)
     {
         list($namespace, $name) = $this->getNamespaceNameFromFullName($fullName);
 
@@ -353,7 +361,7 @@ class EntityDataModel
      *
      * @return array An array with the namespace at index 0 and the name at index 1.
      */
-    private function getNamespaceNameFromFullName($fullName) : array
+    private function getNamespaceNameFromFullName(string $fullName) : array
     {
         $lastDotPos = stripos($fullName, '.');
 

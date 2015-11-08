@@ -1,24 +1,17 @@
 <?php
 
-/*
- * This file is part of the Rolab Entity Data Model library.
- *
- * (c) Roland Schermer <roland0507@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types=1);
 
 namespace Rolab\EntityDataModel\Tests;
 
-use Rolab\EntityDataModel\Tests\EntityDataModelTestCase;
-
 use Rolab\EntityDataModel\EntitySet;
+use Rolab\EntityDataModel\Type\EntityType;
+use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
  * @covers EntitySet
  */
-class EntitySetTest extends EntityDataModelTestCase
+class EntitySetTest extends NamedContainerElementTestCase
 {
     public function testConstructor()
     {
@@ -36,23 +29,84 @@ class EntitySetTest extends EntityDataModelTestCase
      * @dataProvider invalidNameProvider
      * @expectedException InvalidArgumentException
      */
-    public function testExceptionOnInvalidName($invalidName)
+    public function testExceptionOnInvalidName(string $invalidName)
     {
-        $entitySet = new EntitySet($invalidName, $this->buildEntityTypeStub());
+        new EntitySet($invalidName, $this->buildEntityTypeStub());
+    }
+
+    public function testBindNavigationPropertyDescription()
+    {
+        $ownerEntityTypeStub = $this->buildEntityTypeStub();
+        $targetEntityTypeStub = $this->buildEntityTypeStub();
+
+        $ownerEntitySet = new EntitySet('SomeOtherName', $ownerEntityTypeStub);
+        $targetEntitySet = new EntitySet('SomeOtherName', $targetEntityTypeStub);
+
+        $container = $this->buildEntityContainerStub();
+
+        $ownerEntitySet->setEntityContainer($container);
+        $targetEntitySet->setEntityContainer($container);
+
+        $this->assertCount(0, $ownerEntitySet->getNavigationPropertyBindings());
+
+        $navigationPropertyStub = $this->buildNavigationPropertyDescriptionStub(
+            $ownerEntityTypeStub,
+            $targetEntityTypeStub
+        );
+
+        $ownerEntitySet->bindNavigationProperty($navigationPropertyStub, $targetEntitySet);
+
+        $this->assertCount(1, $ownerEntitySet->getNavigationPropertyBindings());
     }
 
     /**
-     * @depends testConstructor
+     * @expectedException InvalidArgumentException
      */
-    public function testSetEntityContainer($entitySet)
+    public function testExceptionOnBindNavigationPropertyDescriptionWithTargetSetInDifferentContainer()
     {
-        $entityContainerStub = $this->getMockBuilder('Rolab\EntityDataModel\EntityContainer')
-            ->disableOriginalConstructor()
-            ->getMock();
+        $ownerEntityTypeStub = $this->buildEntityTypeStub();
+        $targetEntityTypeStub = $this->buildEntityTypeStub();
 
-        $entitySet->setEntityContainer($entityContainerStub);
+        $ownerEntitySet = new EntitySet('SomeOtherName', $ownerEntityTypeStub);
+        $targetEntitySet = new EntitySet('SomeOtherName', $targetEntityTypeStub);
 
-        $this->assertSame($entityContainerStub, $entitySet->getEntityContainer());
+        $container = $this->buildEntityContainerStub();
+        $otherContainer = $this->buildEntityContainerStub();
+
+        $ownerEntitySet->setEntityContainer($container);
+        $targetEntitySet->setEntityContainer($otherContainer);
+
+        $navigationPropertyStub = $this->buildNavigationPropertyDescriptionStub(
+            $ownerEntityTypeStub,
+            $targetEntityTypeStub
+        );
+
+        $ownerEntitySet->bindNavigationProperty($navigationPropertyStub, $targetEntitySet);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testExceptionOnBindNavigationPropertyDescriptionOnDifferentEntityType()
+    {
+        $ownerEntityTypeStub = $this->buildEntityTypeStub();
+        $targetEntityTypeStub = $this->buildEntityTypeStub();
+        $otherEntityTypeStub = $this->buildEntityTypeStub();
+
+        $ownerEntitySet = new EntitySet('SomeOtherName', $otherEntityTypeStub);
+        $targetEntitySet = new EntitySet('SomeOtherName', $targetEntityTypeStub);
+
+        $container = $this->buildEntityContainerStub();
+
+        $ownerEntitySet->setEntityContainer($container);
+        $targetEntitySet->setEntityContainer($container);
+
+        $navigationPropertyStub = $this->buildNavigationPropertyDescriptionStub(
+            $ownerEntityTypeStub,
+            $targetEntityTypeStub
+        );
+
+        $ownerEntitySet->bindNavigationProperty($navigationPropertyStub, $targetEntitySet);
     }
 
     protected function buildEntityTypeStub()
@@ -61,6 +115,33 @@ class EntitySetTest extends EntityDataModelTestCase
             ->disableOriginalConstructor()
             ->getMock();
 
+        $entityTypeStub->method('isSubTypeOf')
+            ->will($this->returnCallback(function () use ($entityTypeStub) {
+                return func_get_args()[0] === $entityTypeStub;
+            }));
+
         return $entityTypeStub;
+    }
+
+    protected function buildEntityContainerStub()
+    {
+        return $this->getMockBuilder('Rolab\EntityDataModel\EntityContainer')
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    protected function buildNavigationPropertyDescriptionStub(EntityType $ownerType, EntityType $targetType)
+    {
+        $navigationPropertyStub = $this->getMockBuilder('Rolab\EntityDataModel\Type\NavigationPropertyDescription')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $navigationPropertyStub->method('getPropertyValueType')
+            ->willReturn($targetType);
+
+        $navigationPropertyStub->method('getStructuredType')
+            ->willReturn($ownerType);
+
+        return $navigationPropertyStub;
     }
 }

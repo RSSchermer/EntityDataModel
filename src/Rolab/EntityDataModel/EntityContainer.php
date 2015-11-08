@@ -7,16 +7,27 @@ namespace Rolab\EntityDataModel;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
- * Defines a logical grouping of entities and their associations. Is used
- * in the OData protocol to determine accessibility and uri's for entity
- * resources. An entity container may have a parent container. Entity sets
- * and association sets in the child container may then references any of 
- * the entity sets and association sets in the parent container. 
+ * Defines a logical grouping of entities.
+ *
+ * An entity container is used in the OData protocol specify the service's
+ * entity sets and singletons. An entity container may have a parent container,
+ * in which case entity sets in the child container may reference the entity
+ * sets in the parent container.
  *
  * @author Roland Schermer <roland0507@gmail.com>
  */
-class EntityContainer extends NamedModelElement
+class EntityContainer implements NamedModelConstruct
 {
+    /**
+     * @var string
+     */
+    private $name;
+
+    /**
+     * @var EntityDataModel
+     */
+    private $entityDataModel;
+
     /**
      * @var EntityContainer
      */
@@ -36,22 +47,78 @@ class EntityContainer extends NamedModelElement
      * 
      * @param string               $name            The name of the entity container (must contain 
      *                                              only alphanumber characters and underscores).
+     * @param EntityDataModel      $entityDataModel The entity data model this entity container is
+     *                                              defined on.
      * @param null|EntityContainer $parentContainer An optional parent container for the entity 
      *                                              container
      * 
      * @throws InvalidArgumentException Thrown if the container's name contains illegal characters.
      */
-    public function __construct(string $name, EntityContainer $parentContainer = null)
-    {
-        parent::__construct($name);
-        
+    public function __construct(
+        string $name,
+        EntityDataModel $entityDataModel,
+        EntityContainer $parentContainer = null
+    ) {
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $name)) {
+            throw new InvalidArgumentException(sprintf(
+                '"%s" is an illegal name for an entity container. The name for an entity container may only ' .
+                'contain alphanumeric characters and underscores.',
+                $name
+            ));
+        }
+
+        $this->name = $name;
+        $this->entityDataModel = $entityDataModel;
         $this->parentContainer = $parentContainer;
+
+        if (null !== $parentContainer &&
+            !in_array($parentContainer->getEntityDataModel(), $entityDataModel->getReferencedModels())
+        ) {
+            $entityDataModel->addReferencedModel($parentContainer->getEntityDataModel());
+        }
+    }
+
+    /**
+     * Returns the entity data model the entity container is defined on.
+     *
+     * @return EntityDataModel The entity data model the entity container is defined on..
+     */
+    public function getEntityDataModel()
+    {
+        return $this->entityDataModel;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getName() : string
+    {
+        return $this->name;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getNamespace() : string
+    {
+        return $this->entityDataModel->getNamespace();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getFullName() : string
+    {
+        $namespace = $this->getNamespace();
+
+        return $namespace ? $namespace .'.'. $this->getName() : $this->getName();
     }
     
     /**
      * Returns the entity container's parent container if one was set.
      * 
-     * @return EntityContainer The entity container's parent container.
+     * @return EntityContainer|null The entity container's parent container or null if no
+     *                              parent container was specified.
      */
     public function getParentContainer()
     {
@@ -64,7 +131,7 @@ class EntityContainer extends NamedModelElement
      * Adds an entity set to the entity container. Entity sets within one entity
      * container must have unique names. However, an entity set may have the same
      * name as another entity set in the parent container, in which case the entity
-     * set in the parent container is overriden.
+     * set in the parent container is overridden.
      * 
      * @param EntitySet $entitySet The entity set to be added to the entity container
      * 
@@ -76,8 +143,11 @@ class EntityContainer extends NamedModelElement
     {
         if (isset($this->entitySets[$entitySet->getName()])) {
             throw new InvalidArgumentException(sprintf(
-                'The entity container already contains an entity set by the name "%s"',
-                $entitySet->getName()
+                'Tried to add entity set with name "%s" to entity container "%s", but this entity container already ' .
+                'contains an element with that name. Entity container elements within the same entity container must' .
+                'have unique names',
+                $entitySet->getName(),
+                $this->getFullName()
             ));
         }
 
@@ -113,11 +183,13 @@ class EntityContainer extends NamedModelElement
      * container, an entity set will be returned. If the both the child container and
      * the parent container contain an entity set with the same name, only the entity
      * set in the child container will be returned.
+     *
+     * @param string $name The name of the entity set.
      * 
      * @return null|EntitySet An entity set with the name searched for or null if no
      *                        such entity set exists in the container.
      */
-    public function getEntitySetByName($name)
+    public function getEntitySetByName(string $name)
     {
         $entitySets = $this->getEntitySets();
 

@@ -8,8 +8,10 @@ use Rolab\EntityDataModel\NamedModelElement;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
- * Represents a structural data type. A structured type is not atomic,
- * it is build from other types. Maps to a class definition.
+ * Represents a structured data type.
+ *
+ * A structured type is not atomic; it is build from other types.
+ * It is linked to a PHP class definition.
  * 
  * @author Roland Schermer <roland0507@gmail.com>
  */

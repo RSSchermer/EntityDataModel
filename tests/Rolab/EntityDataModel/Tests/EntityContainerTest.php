@@ -1,40 +1,53 @@
 <?php
 
-/*
- * This file is part of the Rolab Entity Data Model library.
- *
- * (c) Roland Schermer <roland0507@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types=1);
 
 namespace Rolab\EntityDataModel\Tests;
 
-use Rolab\EntityDataModel\Tests\EntityDataModelTestCase;
-
 use Rolab\EntityDataModel\EntityContainer;
+use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
  * @covers EntityContainer
  */
-class EntityContainerTest extends EntityDataModelTestCase
+class EntityContainerTest extends \PHPUnit_Framework_TestCase
 {
     public function testConstructor()
     {
-        $entityContainer = new EntityContainer('SomeContainer');
+        $entityDataModel = $this->buildEntityDataModelStub();
+
+        $entityContainer = new EntityContainer('SomeContainer', $entityDataModel);
 
         $this->assertEquals($entityContainer->getName(), 'SomeContainer');
+        $this->assertSame($entityDataModel, $entityContainer->getEntityDataModel());
+        $this->assertEquals('SomeNamespace', $entityContainer->getNamespace());
+        $this->assertEquals('SomeNamespace.SomeContainer', $entityContainer->getFullName());
 
         return $entityContainer;
     }
 
-    /**
-     * @depends testConstructor
-     */
-    public function testConstructorWithParentContainer(EntityContainer $parentEntityContainer)
+    public function testConstructorWithParentContainer()
     {
-        $childEntityContainer = new EntityContainer('ChildContainer', $parentEntityContainer);
+        $parentContainerModel = $this->buildEntityDataModelStub();
+
+        $parentEntityContainer = new EntityContainer('SomeContainer', $parentContainerModel);
+
+        $childContainerModel = $this->getMockBuilder('Rolab\EntityDataModel\EntityDataModel')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $childContainerModel->method('getNamespace')->willReturn('SomeNamespace');
+        $childContainerModel->method('getReferencedModels')->willReturn(array());
+
+        $childContainerModel->expects($this->once())
+            ->method('addReferencedModel')
+            ->with($this->equalTo($parentContainerModel));
+
+        $childEntityContainer = new EntityContainer(
+            'ChildContainer',
+            $childContainerModel,
+            $parentEntityContainer
+        );
 
         $this->assertSame($parentEntityContainer, $childEntityContainer->getParentContainer());
 
@@ -45,9 +58,9 @@ class EntityContainerTest extends EntityDataModelTestCase
      * @dataProvider invalidNameProvider
      * @expectedException InvalidArgumentException
      */
-    public function testExceptionOnInvalidName($invalidName)
+    public function testExceptionOnInvalidName(string $invalidName)
     {
-        $entityContainer = new EntityContainer($invalidName);
+        new EntityContainer($invalidName, $this->buildEntityDataModelStub());
     }
 
     /**
@@ -102,16 +115,15 @@ class EntityContainerTest extends EntityDataModelTestCase
 
     public function testGetEntitySetByNameWithParentContainer()
     {
-        $parentContainer = new EntityContainer('ParentContainer');
+        $parentContainer = new EntityContainer('ParentContainer', $this->buildEntityDataModelStub());
 
         $parentContainerEntitySet = $this->buildEntitySetStub('SomeEntitySet');
 
         $parentContainer->addEntitySet($parentContainerEntitySet);
 
-        $childContainer = new EntityContainer('ChildContainer', $parentContainer);
+        $childContainer = new EntityContainer('ChildContainer', $this->buildEntityDataModelStub(), $parentContainer);
 
-        $this->assertSame($parentContainerEntitySet,
-            $childContainer->getEntitySetByName('SomeEntitySet'));
+        $this->assertSame($parentContainerEntitySet, $childContainer->getEntitySetByName('SomeEntitySet'));
 
         return $childContainer;
     }
@@ -125,115 +137,38 @@ class EntityContainerTest extends EntityDataModelTestCase
 
         $childContainer->addEntitySet($childContainerEntitySet);
 
-        $this->assertSame($childContainerEntitySet,
-            $childContainer->getEntitySetByName('SomeEntitySet'));
+        $this->assertSame($childContainerEntitySet, $childContainer->getEntitySetByName('SomeEntitySet'));
     }
 
-    /**
-     * @depends testConstructor
-     */
-    public function testGetAssociationSetsInitiallyEmpty(EntityContainer $entityContainer)
+    public function invalidNameProvider()
     {
-        $this->assertEmpty($entityContainer->getAssociationSets());
-
-        return $entityContainer;
+        return array(
+            array('A-dashed-name'),
+            array('N@meW|thS%mbols'),
+            array('Name With Spaces'),
+            array('Name.With.Dots')
+        );
     }
 
-    /**
-     * @depends testGetAssociationSetsInitiallyEmpty
-     */
-    public function testAddAssociationSet(EntityContainer $entityContainer)
-    {
-        $mockAssociationSet = $this->buildAssociationSetStub('SomeAssociationSet', 'SomeNamespace.SomeAssociation');
-
-        $mockAssociationSet->expects($this->once())
-            ->method('setEntityContainer')
-            ->with($this->equalTo($entityContainer));
-
-        $entityContainer->addAssociationSet($mockAssociationSet);
-
-        $this->assertCount(1, $entityContainer->getAssociationSets());
-        $this->assertContains($mockAssociationSet, $entityContainer->getAssociationSets());
-
-        return $entityContainer;
-    }
-
-    /**
-     * @depends testAddAssociationSet
-     * @expectedException InvalidArgumentException
-     */
-    public function testExceptionOnAddAssociationSetWithSameName(EntityContainer $entityContainer)
-    {
-        $entityContainer->addAssociationSet($this->buildAssociationSetStub('SomeAssociationSet',
-            'SomeNamespace.SomeOtherAssociation'));
-    }
-
-    /**
-     * @depends testAddEntitySet
-     */
-    public function testGetAssociationSetByName(EntityContainer $entityContainer)
-    {
-        $associationSetStub = $this->buildAssociationSetStub('SomeOtherAssociationSet');
-
-        $entityContainer->addAssociationSet($associationSetStub);
-
-        $this->assertSame($associationSetStub, $entityContainer->getAssociationSetByName('SomeOtherAssociationSet'));
-    }
-
-    public function testGetAssociationSetByNameWithParentContainer()
-    {
-        $parentContainer = new EntityContainer('ParentContainer');
-
-        $parentContainerAssociationSet = $this->buildAssociationSetStub('SomeAssociationSet');
-
-        $parentContainer->addAssociationSet($parentContainerAssociationSet);
-
-        $childContainer = new EntityContainer('ChildContainer', $parentContainer);
-
-        $this->assertSame($parentContainerAssociationSet,
-            $childContainer->getAssociationSetByName('SomeAssociationSet'));
-
-        return $childContainer;
-    }
-
-    /**
-     * @depends testGetAssociationSetByNameWithParentContainer
-     */
-    public function testGetAssociationSetByNameParentSetOverwrittenByChildSet(EntityContainer $childContainer)
-    {
-        $childContainerAssociationSet = $this->buildAssociationSetStub('SomeAssociationSet');
-
-        $childContainer->addAssociationSet($childContainerAssociationSet);
-
-        $this->assertSame($childContainerAssociationSet,
-            $childContainer->getAssociationSetByName('SomeAssociationSet'));
-    }
-
-    protected function buildEntitySetStub($name)
+    protected function buildEntitySetStub(string $name)
     {
         $entitySetStub = $this->getMockBuilder('Rolab\EntityDataModel\EntitySet')
             ->disableOriginalConstructor()
-            ->setMethods(array('setEntityContainer', 'getName'))
             ->getMock();
 
-        $entitySetStub->expects($this->any())
-            ->method('getName')
-            ->will($this->returnValue($name));
+        $entitySetStub->method('getName')->willReturn($name);
 
         return $entitySetStub;
     }
 
-    protected function buildAssociationSetStub($name)
+    protected function buildEntityDataModelStub()
     {
-        $associationSetStub = $this->getMockBuilder('Rolab\EntityDataModel\AssociationSet')
+        $entityDataModelStub = $this->getMockBuilder('Rolab\EntityDataModel\EntityDataModel')
             ->disableOriginalConstructor()
-            ->setMethods(array('setEntityContainer', 'getName'))
             ->getMock();
 
-        $associationSetStub->expects($this->any())
-            ->method('getName')
-            ->will($this->returnValue($name));
+        $entityDataModelStub->method('getNamespace')->willReturn('SomeNamespace');
 
-        return $associationSetStub;
+        return $entityDataModelStub;
     }
 }

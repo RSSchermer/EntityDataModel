@@ -7,8 +7,10 @@ namespace Rolab\EntityDataModel\Type;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
- * Describes a complex property of a complex type.
- * 
+ * Describes a complex property on a structured type.
+ *
+ * A complex property's value type is a complex type.
+ *
  * @author Roland Schermer <roland0507@gmail.com>
  */
 class ComplexPropertyDescription extends StructuralPropertyDescription
