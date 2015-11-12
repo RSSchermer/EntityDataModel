@@ -68,4 +68,20 @@ class ComplexPropertyDescriptionTest extends ResourcePropertyDescriptionTestCase
             $this->propertyValueTypeFixture
         );
     }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testExceptionOnEntityTypeAsPropertyValueType()
+    {
+        $entityTypeStub = $this->getMockBuilder('Rolab\EntityDataModel\Type\EntityType')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        new ComplexPropertyDescription(
+            'Address',
+            $this->propertyReflectionFixture,
+            $entityTypeStub
+        );
+    }
 }

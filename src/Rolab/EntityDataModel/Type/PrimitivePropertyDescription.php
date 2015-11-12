@@ -34,6 +34,7 @@ class PrimitivePropertyDescription extends StructuralPropertyDescription
      * @param \ReflectionProperty $reflection        A reflection object for the property being described.
      * @param PrimitiveType       $propertyType      The type of the property value.
      * @param bool                $isCollection      Whether or not the property value is a collection.
+     * @param bool                $nullable          Whether or not the property value can be null.
      * @param bool                $partOfKey         Whether or not the property is part of the key of an
      *                                               entity type.
      * @param bool                $partOfETag        Whether not the property is part of the E-tag of an
@@ -46,10 +47,11 @@ class PrimitivePropertyDescription extends StructuralPropertyDescription
         \ReflectionProperty $reflection,
         PrimitiveType $propertyType,
         bool $isCollection = false,
+        bool $nullable = true,
         bool $partOfKey = false,
         bool $partOfETag = false
     ) {
-        parent::__construct($name, $reflection, $propertyType, $isCollection);
+        parent::__construct($name, $reflection, $propertyType, $isCollection, $nullable);
 
         $this->partOfKey = $partOfKey;
         $this->partOfETag = $partOfETag;

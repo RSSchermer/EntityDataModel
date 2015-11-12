@@ -40,6 +40,7 @@ class PrimitivePropertyDescriptionTest extends ResourcePropertyDescriptionTestCa
         $this->assertSame($this->propertyReflectionFixture, $primitivePropertyDescription->getReflection());
         $this->assertSame($this->propertyValueTypeFixture, $primitivePropertyDescription->getPropertyValueType());
         $this->assertFalse($primitivePropertyDescription->isCollection());
+        $this->assertTrue($primitivePropertyDescription->isNullable());
         $this->assertFalse($primitivePropertyDescription->isPartOfKey());
         $this->assertFalse($primitivePropertyDescription->isPartOfETag());
 
@@ -58,6 +59,19 @@ class PrimitivePropertyDescriptionTest extends ResourcePropertyDescriptionTestCa
         $this->assertTrue($primitivePropertyDescription->isCollection());
     }
 
+    public function testConstructorWithNullable()
+    {
+        $primitivePropertyDescription = new PrimitivePropertyDescription(
+            'SomeProperty',
+            $this->propertyReflectionFixture,
+            $this->propertyValueTypeFixture,
+            false,
+            false
+        );
+
+        $this->assertFalse($primitivePropertyDescription->isNullable());
+    }
+
     public function testConstructorWithPartOfKey()
     {
         $primitivePropertyDescription = new PrimitivePropertyDescription(
@@ -65,6 +79,7 @@ class PrimitivePropertyDescriptionTest extends ResourcePropertyDescriptionTestCa
             $this->propertyReflectionFixture,
             $this->propertyValueTypeFixture,
             false,
+            true,
             true
         );
 
@@ -78,6 +93,7 @@ class PrimitivePropertyDescriptionTest extends ResourcePropertyDescriptionTestCa
             $this->propertyReflectionFixture,
             $this->propertyValueTypeFixture,
             false,
+            true,
             false,
             true
         );

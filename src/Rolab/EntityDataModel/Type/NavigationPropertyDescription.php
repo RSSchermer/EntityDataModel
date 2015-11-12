@@ -20,13 +20,13 @@ use Rolab\EntityDataModel\Exception\RuntimeException;
  */
 class NavigationPropertyDescription extends ResourcePropertyDescription
 {
-    const DELETE_ACTION_NONE = 0;
+    const DELETE_ACTION_NONE = 'none';
 
-    const DELETE_ACTION_CASCADE = 1;
+    const DELETE_ACTION_CASCADE = 'cascade';
 
-    const DELETE_ACTION_SET_NULL = 2;
+    const DELETE_ACTION_SET_NULL = 'set_null';
 
-    const DELETE_ACTION_SET_DEFAULT = 3;
+    const DELETE_ACTION_SET_DEFAULT = 'set_default';
 
     /**
      * @var NavigationPropertyDescription
@@ -66,7 +66,7 @@ class NavigationPropertyDescription extends ResourcePropertyDescription
         EntityType $propertyValueType,
         bool $isCollection = false,
         bool $nullable = true,
-        int $onDeleteAction = self::DELETE_ACTION_NONE
+        string $onDeleteAction = self::DELETE_ACTION_NONE
     ) {
         parent::__construct($name, $reflection, $propertyValueType, $isCollection, $nullable);
 
@@ -167,7 +167,7 @@ class NavigationPropertyDescription extends ResourcePropertyDescription
      *
      * @return int An integer indicating this navigation property's "on delete" action.
      */
-    public function getOnDeleteAction() : int
+    public function getOnDeleteAction() : string
     {
         return $this->onDeleteAction;
     }

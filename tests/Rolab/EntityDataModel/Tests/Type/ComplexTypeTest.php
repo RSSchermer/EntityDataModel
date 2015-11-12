@@ -44,14 +44,6 @@ class ComplexTypeTest extends ComplexTypeTestCase
     {
         $propertyStub = $this->buildStructuralPropertyDescriptionStub('City');
 
-        new ComplexType($invalidName, $this->adressReflectionClassFixture, array($propertyStub));
-    }
-
-    /**
-     * @expectedException InvalidArgumentException
-     */
-    public function testExceptionOnEmptyPropertyDescriptionArray()
-    {
-        new ComplexType('Address', $this->adressReflectionClassFixture, array());
+        new ComplexType($invalidName, $this->adressReflectionClassFixture);
     }
 }

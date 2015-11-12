@@ -72,7 +72,7 @@ class NavigationPropertyDescriptionTest extends ResourcePropertyDescriptionTestC
             $this->buildEntityTypeStub('SomeEntity'),
             false,
             true,
-            -1
+            'something'
         );
     }
 

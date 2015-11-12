@@ -36,17 +36,12 @@ class ComplexType extends StructuredType
      * @throws InvalidArgumentException Thrown if the name contains illegal characters.
      *                                  Thrown if the property description list is empty.
      */
-    public function __construct(string $name, \ReflectionClass $reflection, array $structuralPropertyDescriptions)
-    {
+    public function __construct(
+        string $name,
+        \ReflectionClass $reflection,
+        array $structuralPropertyDescriptions = array()
+    ) {
         parent::__construct($name, $reflection);
-
-        if (count($structuralPropertyDescriptions) === 0) {
-            throw new InvalidArgumentException(sprintf(
-                'Tried to define type "%s" with an empty list of property descriptions. A complex type must always ' .
-                'be defined with least one property.',
-                $name
-            ));
-        }
 
         foreach ($structuralPropertyDescriptions as $propertyDescription) {
             $this->addStructuralPropertyDescription($propertyDescription);

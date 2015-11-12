@@ -1,38 +1,21 @@
 <?php
 
-/*
- * This file is part of the Rolab Entity Data Model library.
- *
- * (c) Roland Schermer <roland0507@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Rolab\EntityDataModel\Definition;
 
-use Metadata\PropertyMetadata;
-
-class NavigationPropertyMetadata extends PropertyMetadata
+class NavigationPropertyMetadata extends ResourcePropertyMetadata
 {
-    public $targetEntity;
+    public $targetEntityClassName;
+
+    public $partner;
     
-    public $role;
-    
-    public $targetRole;
-    
-    public $multiplicity = '0..1';
-    
-    public $deleteAction = 'none';
+    public $onDeleteAction = 'none';
     
     public function serialize()
     {
         return serialize(array(
-            $this->role,
-            $this->targetEntity,
-            $this->targetRole,
-            $this->multiplicity,
-            $this->deleteAction,
+            $this->targetEntityClassName,
+            $this->partner,
+            $this->onDeleteAction,
             parent::serialize()
         ));
     }
@@ -40,11 +23,9 @@ class NavigationPropertyMetadata extends PropertyMetadata
     public function unserialize($data)
     {
         list(
-            $this->role,
-            $this->targetEntity,
-            $this->targetRole,
-            $this->multiplicity,
-            $this->deleteAction,
+            $this->targetEntityClassName,
+            $this->partner,
+            $this->onDeleteAction,
             $parentData
         ) = unserialize($data);
         

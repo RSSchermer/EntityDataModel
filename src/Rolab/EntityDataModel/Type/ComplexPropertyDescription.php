@@ -26,6 +26,7 @@ class ComplexPropertyDescription extends StructuralPropertyDescription
      * @param boolean             $isCollection      Whether or not the property value is a collection.
      * 
      * @throws InvalidArgumentException Thrown if the name contains illegal characters.
+     *                                  Thrown if the property value type is an entity type.
      */
     public function __construct(
         string $name,
@@ -34,5 +35,14 @@ class ComplexPropertyDescription extends StructuralPropertyDescription
         bool $isCollection = false
     ) {
         parent::__construct($name, $reflection, $propertyType, $isCollection);
+
+        if ($propertyType instanceof EntityType) {
+            throw new InvalidArgumentException(sprintf(
+                'Tried to set entity type "%s" as the property value type of property "%s". The property value ' .
+                'type of a complex property cannot be an entity type.',
+                $propertyType->getFullName(),
+                $name
+            ));
+        }
     }
 }

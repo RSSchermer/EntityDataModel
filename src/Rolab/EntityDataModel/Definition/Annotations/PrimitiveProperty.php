@@ -1,22 +1,34 @@
 <?php
 
-/*
- * This file is part of the Rolab Entity Data Model library.
- *
- * (c) Roland Schermer <roland0507@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Rolab\EntityDataModel\Annotations;
 
 /**
  * @Annotation
  * @Target("PROPERTY")
  */
-class PrimitiveProperty extends StructuralProperty
+class PrimitiveProperty extends ResourceProperty
 {
-    /** @var string */
+    /**
+     * @Enum({
+     *    'Binary',
+     *    'Boolean',
+     *    'Byte',
+     *    'Date',
+     *    'DateTimeOffset',
+     *    'Decimal',
+     *    'Double',
+     *    'Duration',
+     *    'Guid',
+     *    'Int16',
+     *    'Int32',
+     *    'Int64',
+     *    'SByte',
+     *    'Single',
+     *    'Stream',
+     *    'String',
+     *    'TimeOfDay'
+     * })
+     * @Required
+     */
     public $type;
 }

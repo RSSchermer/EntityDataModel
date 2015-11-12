@@ -1,26 +1,15 @@
 <?php
 
-/*
- * This file is part of the Rolab Entity Data Model library.
- *
- * (c) Roland Schermer <roland0507@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Rolab\EntityDataModel\Definition;
 
-use Rolab\EntityDataModel\Definition\StructuralPropertyMetadata;
-
-abstract class ComplexPropertyMetadata extends StructuralPropertyMetadata
+class ComplexPropertyMetadata extends ResourcePropertyMetadata
 {
-    public $className;
+    public $complexTypeClassName;
     
     public function serialize()
     {
         return serialize(array(
-            $this->className,
+            $this->complexTypeClassName,
             parent::serialize()
         ));
     }
@@ -28,7 +17,7 @@ abstract class ComplexPropertyMetadata extends StructuralPropertyMetadata
     public function unserialize($data)
     {
         list(
-            $this->className,
+            $this->complexTypeClassName,
             $parentData
         ) = unserialize($data);
         
