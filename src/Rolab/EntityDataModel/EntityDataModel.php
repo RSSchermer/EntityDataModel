@@ -151,13 +151,13 @@ class EntityDataModel
      * Adds a referenced entity data model.
      *
      * Add an entity data model that can be referenced by elements of this entity data model.
-     * All of the structured types, associations and entity containers of the referenced
-     * model can be used by elements of the referencing model by prepending the names of the
-     * elements with either the referenced models namespace or, if a namespace alias is specified
-     * for the referenced model, by the namespace alias of the referenced model. If an alias is
-     * specified for the referenced model, the alias MUST be used to reference the model. This
-     * is to potentially allow references to models that share a real namespace, which can then
-     * still be unique identified through the alias.
+     * All structured types defined on the referenced model can be referenced by elements of
+     * the referencing model by prepending the names of the elements with either the referenced
+     * models namespace or, if a namespace alias is specified for the referenced model, by the
+     * namespace alias of the referenced model. If an alias is specified for the referenced model,
+     * the alias MUST be used to reference the model. This is to potentially allow references to
+     * models that share a real namespace, which can then still be unique identified through the
+     * alias.
      *
      * @param EntityDataModel $referencedModel The model that is referenced by the current entity
      *                                         data model.
@@ -174,16 +174,12 @@ class EntityDataModel
      */
     public function addReferencedModel(EntityDataModel $referencedModel, string $namespaceAlias = null)
     {
-        if (isset($namespaceAlias)) {
-            $referencedModel->setNamespaceAlias($namespaceAlias);
-        }
-
-        $namespace = $referencedModel->getNamespace();
+        $namespace = $namespaceAlias ?? $referencedModel->getNamespace();
 
         if (isset($this->referencedModels[$namespace]) || $namespace === $this->getNamespace()) {
             throw new InvalidArgumentException(sprintf(
-                'Namespace "%s" is already used by some other referenced entity data model. Please specify an alias ' .
-                'as the second argument.',
+                'Namespace "%s" is already used by some other referenced entity data model. Specify a (different) ' .
+                'namespace alias if you wish to reference this model.',
                 $namespace
             ));
         }
@@ -222,7 +218,7 @@ class EntityDataModel
      *
      * Adds a structured type to the entity data model. Structured types within one
      * entity data model must have unique names and no two structured types within one
-     * entity data model may describe the same class.
+     * entity data model may be defined by the same class.
      *
      * @param StructuredType $structuredType The structured type to be added to the entity data model.
      *

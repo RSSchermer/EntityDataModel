@@ -83,7 +83,6 @@ class EntityDataModelTest extends \PHPUnit_Framework_TestCase
 
         $this->assertCount(1, $edm->getReferencedModels());
         $this->assertContains($referencedModel, $edm->getReferencedModels());
-        $this->assertEquals('Referenced', $referencedModel->getNamespace());
 
         return $edm;
     }
@@ -113,11 +112,11 @@ class EntityDataModelTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testAddReferencedModel
      */
-    public function testGetReferencedModelByName(EntityDataModel $edm)
+    public function testGetReferencedModelByNamespace(EntityDataModel $edm)
     {
         $this->assertNull($edm->getReferencedModelByNamespace('Non.Existant.Namespace'));
 
-        $this->assertEquals('Referenced', $edm->getReferencedModelByNamespace('Referenced')->getNamespace());
+        $this->assertEquals('Some.Alias', $edm->getReferencedModelByNamespace('Referenced')->getNamespace());
     }
 
     /**

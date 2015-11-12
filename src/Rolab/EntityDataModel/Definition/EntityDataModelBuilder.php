@@ -22,24 +22,14 @@ use Rolab\EntityDataModel\Type\PrimitivePropertyDescription;
 class EntityDataModelBuilder
 {
     /**
+     * @var EntityDataModel
+     */
+    private $entityDataModel;
+
+    /**
      * @var MetadataFactory
      */
     private $metadataFactory;
-
-    /**
-     * @var string
-     */
-    private $uri;
-
-    /**
-     * @var string
-     */
-    private $namespace;
-
-    /**
-     * @var string
-     */
-    private $namespaceAlias;
 
     /**
      * @var bool
@@ -111,22 +101,65 @@ class EntityDataModelBuilder
         string $namespaceAlias = null,
         bool $autoLoadMissingReferences = true)
     {
-        $this->uri = $uri;
-        $this->namespace = $namespace;
-        $this->namespaceAlias = $namespaceAlias;
+        $this->entityDataModel = new EntityDataModel($uri, $namespace, $namespaceAlias);
         $this->metadataFactory = $metadataFactory;
         $this->autoLoadMissingReferences = $autoLoadMissingReferences;
     }
 
     /**
+     * Adds a referenced entity data model.
+     *
+     * Add an entity data model that can be referenced by elements of this entity data model.
+     * All structured types defined on the referenced model can be referenced by elements of
+     * the referencing model by prepending the names of the elements with either the referenced
+     * models namespace or, if a namespace alias is specified for the referenced model, by the
+     * namespace alias of the referenced model. If an alias is specified for the referenced model,
+     * the alias MUST be used to reference the model. This is to potentially allow references to
+     * models that share a real namespace, which can then still be unique identified through the
+     * alias.
+     *
+     * @param EntityDataModel $referencedModel The model that is referenced by the current entity
+     *                                         data model.
+     * @param null|string     $namespaceAlias  An optional namespace alias for the model that is
+     *                                         being referenced (an alias must be given if the
+     *                                         referenced model shares a namespace with another
+     *                                         referenced model or the current entity data model).
+     *
+     * @return EntityDataModelBuilder The current entity data model builder for convenient method chaining.
+     *
+     * @throws InvalidArgumentException Thrown if the referenced model's namespace is the same as the
+     *                                  namespace (alias) of another referenced model or the current
+     *                                  entity data model or if (when specified) the namespace alias
+     *                                  for the referenced model is the same as the namespace (alias)
+     *                                  of another referenced model of the current entity data model.
+     */
+    public function addReferencedModel(
+        EntityDataModel $referencedModel,
+        string $namespaceAlias = null
+    ) : EntityDataModelBuilder {
+        $this->entityDataModel->addReferencedModel($referencedModel, $namespaceAlias);
+
+        return $this;
+    }
+
+    /**
      * Add the structured type with the specified class name to the entity data model.
+     *
+     * Metadata describing a structured type must be available for the class through one
+     * of the metadata drivers available to this entity data model builder.
+     *
+     * Structured types within one entity data model must have unique names and no two
+     * structured types within one entity data model may be defined by the same class.
      *
      * @param string $className The name of the class (including namespace) that defines the
      *                          structured type.
      *
-     * @return $this The current entity data model builder for convenient method chaining.
+     * @return EntityDataModelBuilder The current entity data model builder for convenient method chaining.
+     *
+     * @throws InvalidArgumentException Thrown if no metadata describing a structured type is available for
+     *                                  the specified class.
      */
-    public function addStructuredType(string $className)
+    public function addStructuredType(string $className) : EntityDataModelBuilder
     {
         $metadata = $this->metadataFactory->getMetadataForClass($className);
 
@@ -149,15 +182,13 @@ class EntityDataModelBuilder
      */
     public function result() : EntityDataModel
     {
-        $edm = new EntityDataModel($this->uri, $this->namespace, $this->namespaceAlias);
-
         $complexTypeDefinitions = array_filter($this->structuredTypeDefinitions, function ($definition) {
             return $definition instanceof ComplexTypeMetadata;
         });
 
         // Add complex types to the entity data model.
         foreach($complexTypeDefinitions as $complexTypeDefinition) {
-            $this->addComplexTypeToEDM($complexTypeDefinition, $edm);
+            $this->addComplexTypeToEDM($complexTypeDefinition, $this->entityDataModel);
         }
 
         $entityTypeDefinitions = array_filter($this->structuredTypeDefinitions, function ($definition) {
@@ -166,7 +197,7 @@ class EntityDataModelBuilder
 
         // Add entity types to the entity data model.
         foreach($entityTypeDefinitions as $entityTypeDefinition) {
-            $this->addEntityTypeToEDM($entityTypeDefinition, $edm);
+            $this->addEntityTypeToEDM($entityTypeDefinition, $this->entityDataModel);
         }
 
         // Set navigation property partners.
@@ -203,7 +234,7 @@ class EntityDataModelBuilder
             }
         }
 
-        return $edm;
+        return $this->entityDataModel;
     }
 
     /**
