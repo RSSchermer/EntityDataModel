@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Rolab\EntityDataModel\Type;
 
+use PhpOption\None;
+use PhpOption\Option;
+use PhpOption\Some;
+
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
@@ -24,7 +28,7 @@ abstract class ResourcePropertyDescription
     private $reflection;
     
     /**
-     * @var ComplexType
+     * @var Option
      */
     private $structuredType;
 
@@ -76,6 +80,7 @@ abstract class ResourcePropertyDescription
         $this->propertyValueType = $propertyValueType;
         $this->isCollection = $isCollection;
         $this->nullable = $nullable;
+        $this->structuredType = None::create();
     }
     
     /**
@@ -86,15 +91,16 @@ abstract class ResourcePropertyDescription
      */
     public function setStructuredType(ComplexType $structuredType)
     {
-        $this->structuredType = $structuredType;
+        $this->structuredType = new Some($structuredType);
     }
     
     /**
      * Returns the structured type this resource property description belongs to.
      * 
-     * @return null|ComplexType The structured type this resource property description belongs to.
+     * @return Option The structured type this resource property description belongs to wrapped
+     *                in Some, or None of no structured type has been set.
      */
-    public function getStructuredType()
+    public function getStructuredType() : Option
     {
         return $this->structuredType;
     }

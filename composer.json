@@ -12,6 +12,8 @@
     ],
     "require": {
         "php": ">=7.0.0",
+        "phpoption/phpoption": "^1.5",
+        "phpcollection/phpcollection": "^0.4.0",
         "jms/metadata": "~1.5",
         "doctrine/annotations": "1.*"
     },

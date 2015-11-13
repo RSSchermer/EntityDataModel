@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Rolab\EntityDataModel;
 
+use PhpCollection\Map;
+use PhpCollection\MapInterface;
+use PhpOption\None;
+use PhpOption\Option;
+
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
@@ -29,14 +34,14 @@ class EntityContainer implements NamedModelConstruct
     private $entityDataModel;
 
     /**
-     * @var EntityContainer
+     * @var Option
      */
     private $parentContainer;
 
     /**
-     * @var array
+     * @var MapInterface
      */
-    private $entitySets = array();
+    private $entitySets;
     
     /**
      * Creates a new entity container.
@@ -46,7 +51,7 @@ class EntityContainer implements NamedModelConstruct
      * entity sets and association sets in the parent container.
      * 
      * @param string               $name            The name of the entity container (must contain 
-     *                                              only alphanumber characters and underscores).
+     *                                              only alphanumeric characters and underscores).
      * @param EntityDataModel      $entityDataModel The entity data model this entity container is
      *                                              defined on.
      * @param null|EntityContainer $parentContainer An optional parent container for the entity 
@@ -69,12 +74,14 @@ class EntityContainer implements NamedModelConstruct
 
         $this->name = $name;
         $this->entityDataModel = $entityDataModel;
-        $this->parentContainer = $parentContainer;
+        $this->parentContainer = Option::fromValue($parentContainer);
+        $this->entitySets = new Map();
 
-        if (null !== $parentContainer &&
-            !in_array($parentContainer->getEntityDataModel(), $entityDataModel->getReferencedModels())
+        if (!$this->parentContainer->map(function ($parentContainer) use ($entityDataModel) {
+                return $entityDataModel->getReferencedModels()->contains($parentContainer->getEntityDataModel());
+            })->getOrElse(false)
         ) {
-            $entityDataModel->addReferencedModel($parentContainer->getEntityDataModel());
+            $entityDataModel->addReferencedModel($this->parentContainer->get()->getEntityDataModel());
         }
     }
 
@@ -83,7 +90,7 @@ class EntityContainer implements NamedModelConstruct
      *
      * @return EntityDataModel The entity data model the entity container is defined on..
      */
-    public function getEntityDataModel()
+    public function getEntityDataModel() : EntityDataModel
     {
         return $this->entityDataModel;
     }
@@ -117,10 +124,10 @@ class EntityContainer implements NamedModelConstruct
     /**
      * Returns the entity container's parent container if one was set.
      * 
-     * @return EntityContainer|null The entity container's parent container or null if no
-     *                              parent container was specified.
+     * @return Option The entity container's parent container wrapped in Some or None if no
+     *                parent container was specified.
      */
-    public function getParentContainer()
+    public function getParentContainer() : Option
     {
         return $this->parentContainer;
     }
@@ -141,7 +148,7 @@ class EntityContainer implements NamedModelConstruct
      */
     public function addEntitySet(EntitySet $entitySet)
     {
-        if (isset($this->entitySets[$entitySet->getName()])) {
+        if ($this->entitySets->containsKey($entitySet->getName())) {
             throw new InvalidArgumentException(sprintf(
                 'Tried to add entity set with name "%s" to entity container "%s", but this entity container already ' .
                 'contains an element with that name. Entity container elements within the same entity container must' .
@@ -151,27 +158,20 @@ class EntityContainer implements NamedModelConstruct
             ));
         }
 
-        $this->entitySets[$entitySet->getName()] = $entitySet;
-
+        $this->entitySets->set($entitySet->getName(), $entitySet);
         $entitySet->setEntityContainer($this);
     }
     
     /**
      * Returns all entity sets in the current entity container.
      * 
-     * Returns all entity sets in the current entity container. If a container has a
-     * parent container, entity sets in the parent container will also be returned. If
-     * an entity set in the parent container has the same name as an entity set in the
-     * child container, only the entity set in the child container will be returned.
+     * Returns all entity sets in the current entity container.
      * 
-     * @return EntitySet[] An array container all entity sets in the entity containers.
+     * @return MapInterface A map containing all entity sets in the entity container keyed
+     *                      by name.
      */
-    public function getEntitySets() : array
+    public function getEntitySets() : MapInterface
     {
-        if (isset($this->parentContainer)) {
-            return array_merge($this->parentContainer->getEntitySets(), $this->entitySets);
-        }
-
         return $this->entitySets;
     }
     
@@ -186,13 +186,29 @@ class EntityContainer implements NamedModelConstruct
      *
      * @param string $name The name of the entity set.
      * 
-     * @return null|EntitySet An entity set with the name searched for or null if no
-     *                        such entity set exists in the container.
+     * @return Option An entity set with the name searched for wrapped in Some or None if no
+     *                such entity set exists in the container.
      */
-    public function getEntitySetByName(string $name)
+    public function getEntitySetByName(string $name) : Option
     {
-        $entitySets = $this->getEntitySets();
+        $currentContainer = $this;
 
-        return isset($entitySets[$name]) ? $entitySets[$name] : null;
+        $this->entitySets->get($name);
+
+        if ($this->entitySets->containsKey($name)) {
+            return $this->entitySets->get($name);
+        }
+
+        while ($currentContainer->getParentContainer()->isDefined()) {
+            $parentContainer = $currentContainer->getParentContainer()->get();
+
+            if ($parentContainer->getEntitySets()->containsKey($name)) {
+                return $parentContainer->getEntitySets()->get($name);
+            }
+
+            $currentContainer = $parentContainer;
+        }
+
+        return None::create();
     }
 }

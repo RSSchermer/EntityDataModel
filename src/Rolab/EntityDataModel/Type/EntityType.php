@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Rolab\EntityDataModel\Type;
 
+use PhpCollection\Map;
+use PhpCollection\MapInterface;
+use PhpOption\Option;
+
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
@@ -25,22 +29,22 @@ use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 class EntityType extends ComplexType
 {
     /**
-     * @var NavigationPropertyDescription[]
+     * @var MapInterface
      */
-    private $navigationPropertyDescriptions = array();
+    private $navigationPropertyDescriptions;
 
     /**
-     * @var PrimitivePropertyDescription[]
+     * @var MapInterface
      */
-    private $keyPropertyDescriptions = array();
+    private $keyPropertyDescriptions;
 
     /**
-     * @var PrimitivePropertyDescription[]
+     * @var MapInterface
      */
-    private $eTagPropertyDescriptions = array();
+    private $eTagPropertyDescriptions;
 
     /**
-     * @var EntityType
+     * @var Option
      */
     private $baseType;
 
@@ -69,32 +73,30 @@ class EntityType extends ComplexType
         array $structuralPropertyDescriptions,
         EntityType $baseType = null
     ) {
+        $this->keyPropertyDescriptions = new Map();
+        $this->eTagPropertyDescriptions = new Map();
+        $this->navigationPropertyDescriptions = new Map();
+
         parent::__construct($name, $reflection, $structuralPropertyDescriptions);
 
-        if (empty($this->keyPropertyDescriptions) && null === $baseType) {
+        $this->baseType = Option::fromValue($baseType);
+
+        if ($this->keyPropertyDescriptions->isEmpty() && $this->baseType->isEmpty()) {
             throw new InvalidArgumentException(sprintf(
                 'Tried to define entity type "%s" without at least one key property and without a base entity type. ' .
                 'An entity type must be defined with either at least one key property or a base entity type.',
                 $this->getFullName()
             ));
-        } elseif (count($this->keyPropertyDescriptions) > 0 && null !== $baseType) {
-            throw new InvalidArgumentException(sprintf(
-                'Tried to define entity type "%s" with both a base entity type and one or more key properties. ' .
-                'An entity type may either be defined with a base entity type or with one or more key properties, ' .
-                'not both.',
-                $this->getFullName()
-            ));
         }
-
-        $this->baseType = $baseType;
     }
 
     /**
      * Returns the base type this entity type extends and inherits all properties from.
      *
-     * @return EntityType The base type this entity type extends.
+     * @return Option The base type this entity type extends wrapped in Some, or None if
+     *                the entity type has no base type.
      */
-    public function getBaseType()
+    public function getBaseType() : Option
     {
         return $this->baseType;
     }
@@ -117,12 +119,14 @@ class EntityType extends ComplexType
 
         $parent = $this->getBaseType();
 
-        while ($parent) {
-            if ($parent === $entityType) {
+        while ($parent->isDefined()) {
+            $p = $parent->get();
+
+            if ($p === $entityType) {
                 return true;
             }
 
-            $parent = $parent->getBaseType();
+            $parent = $p->getBaseType();
         }
 
         return false;
@@ -147,11 +151,11 @@ class EntityType extends ComplexType
 
         if ($propertyDescription instanceof PrimitivePropertyDescription) {
             if ($propertyDescription->isPartOfKey()) {
-                $this->keyPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
+                $this->keyPropertyDescriptions->set($propertyDescription->getName(), $propertyDescription);
             }
 
             if ($propertyDescription->isPartOfETag()) {
-                $this->eTagPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
+                $this->eTagPropertyDescriptions->set($propertyDescription->getName(), $propertyDescription);
             }
         }
     }
@@ -170,7 +174,7 @@ class EntityType extends ComplexType
      */
     public function addNavigationPropertyDescription(NavigationPropertyDescription $propertyDescription)
     {
-        if (isset($this->getPropertyDescriptions()[$propertyDescription->getName()])) {
+        if ($this->getPropertyDescriptions()->containsKey($propertyDescription->getName())) {
             throw new InvalidArgumentException(sprintf(
                 'Tried to add navigation property "%s" to entity type "%s", but this entity type already has a ' .
                 'property with this name. The names of the properties defined on a structured type must be unique.',
@@ -179,16 +183,21 @@ class EntityType extends ComplexType
             ));
         }
 
-        $this->navigationPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
+        $this->navigationPropertyDescriptions->set($propertyDescription->getName(), $propertyDescription);
         $propertyDescription->setStructuredType($this);
     }
     
     /**
      * {@inheritDoc}
      */
-    public function getPropertyDescriptions() : array
+    public function getPropertyDescriptions() : MapInterface
     {
-        return array_merge($this->getStructuralPropertyDescriptions(), $this->getNavigationPropertyDescriptions());
+        $a = new Map();
+
+        $a->addMap($this->getStructuralPropertyDescriptions());
+        $a->addMap($this->getNavigationPropertyDescriptions());
+
+        return $a;
     }
 
     /**
@@ -198,67 +207,86 @@ class EntityType extends ComplexType
      */
     public function hasETag() : bool
     {
-        return isset($this->eTagPropertyDescriptions);
+        return !$this->eTagPropertyDescriptions->isEmpty();
     }
     
     /**
-     * Returns all key property descriptions for this entity type.
+     * Returns a map of the key property descriptions for this entity type keyed by
+     * property name.
      * 
-     * @return PrimitivePropertyDescription[] All key property descriptions for this entity type.
+     * @return MapInterface A map of the key property descriptions for this entity type keyed by
+     *                      property name.
      */
-    public function getKeyPropertyDescriptions() : array
+    public function getKeyPropertyDescriptions() : MapInterface
     {
-        if(isset($this->baseType)) {
-            return array_merge($this->baseType->getKeyPropertyDescriptions(), $this->keyPropertyDescriptions);
-        }
+        $ownKeyPropertyDescriptions = $this->keyPropertyDescriptions;
 
-        return $this->keyPropertyDescriptions;
+        return $this->baseType->map(function ($baseType) use ($ownKeyPropertyDescriptions) {
+            $a = new Map();
+
+            $a->addMap($baseType->getKeyPropertyDescriptions());
+            $a->addMap($ownKeyPropertyDescriptions);
+
+            return $a;
+        })->getOrElse($ownKeyPropertyDescriptions);
     }
-    
-    /**
-     * Returns all E-tag property descriptions for this entity type.
-     * 
-     * @return PrimitivePropertyDescription[] All E-tag property descriptions for this entity type.
-     */
-    public function getETagPropertyDescriptions() : array
-    {
-        if(isset($this->baseType)) {
-            return array_merge($this->baseType->getETagPropertyDescriptions(), $this->eTagPropertyDescriptions);
-        }
 
-        return $this->eTagPropertyDescriptions;
+    /**
+     * Returns a map of the E-tag property descriptions for this entity type keyed by
+     * property name.
+     *
+     * @return MapInterface A map of the E-tag property descriptions for this entity type keyed by
+     *                      property name.
+     */
+    public function getETagPropertyDescriptions() : MapInterface
+    {
+        $ownETagPropertyDescriptions = $this->eTagPropertyDescriptions;
+
+        return $this->baseType->map(function ($baseType) use ($ownETagPropertyDescriptions) {
+            $a = new Map();
+
+            $a->addMap($baseType->getETagPropertyDescriptions());
+            $a->addMap($ownETagPropertyDescriptions);
+
+            return $a;
+        })->getOrElse($ownETagPropertyDescriptions);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getStructuralPropertyDescriptions() : array
+    public function getStructuralPropertyDescriptions() : MapInterface
     {
-        if(isset($this->baseType)) {
-            return array_merge(
-                $this->baseType->getStructuralPropertyDescriptions(),
-                parent::getPropertyDescriptions()
-            );
-        }
+        $ownStructuralPropertyDescriptions = parent::getStructuralPropertyDescriptions();
 
-        return parent::getPropertyDescriptions();
+        return $this->baseType->map(function ($baseType) use ($ownStructuralPropertyDescriptions) {
+            $a = new Map();
+
+            $a->addMap($baseType->getStructuralPropertyDescriptions());
+            $a->addMap($ownStructuralPropertyDescriptions);
+
+            return $a;
+        })->getOrElse($ownStructuralPropertyDescriptions);
     }
     
     /**
-     * Returns all navigation property descriptions for this entity type.
+     * Returns a map of the navigation property descriptions for this entity type
+     * keyed by property name.
      * 
-     * @return NavigationPropertyDescription[] All navigation property descriptions for this
-     *                                         entity type.
+     * @return MapInterface A map of the navigation property descriptions for this entity type
+     *                      keyed by property name.
      */
-    public function getNavigationPropertyDescriptions() : array
+    public function getNavigationPropertyDescriptions() : MapInterface
     {
-        if(isset($this->baseType)) {
-            return array_merge(
-                $this->baseType->getNavigationPropertyDescriptions(),
-                $this->navigationPropertyDescriptions
-            );
-        }
+        $ownNavigationPropertyDescriptions = $this->navigationPropertyDescriptions;
 
-        return $this->navigationPropertyDescriptions;
+        return $this->baseType->map(function ($baseType) use ($ownNavigationPropertyDescriptions) {
+            $a = new Map();
+
+            $a->addMap($baseType->getNavigationPropertyDescriptions());
+            $a->addMap($ownNavigationPropertyDescriptions);
+
+            return $a;
+        })->getOrElse($ownNavigationPropertyDescriptions);
     }
 }

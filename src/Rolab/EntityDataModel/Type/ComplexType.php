@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Rolab\EntityDataModel\Type;
 
+use PhpCollection\Map;
+use PhpCollection\MapInterface;
+use PhpOption\Option;
+
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
@@ -19,19 +23,19 @@ use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 class ComplexType extends StructuredType
 {
     /**
-     * @var array
+     * @var MapInterface
      */
-    private $structuralPropertyDescriptions = array();
+    private $structuralPropertyDescriptions;
     
     /**
      * Creates a new complex type.
      * 
-     * @param string                         $name                 The name of the complex type (may only
-     *                                                             contain alphanumeric characters and the
-     *                                                             underscore).
-     * @param \ReflectionClass               $reflection           Reflection of the class this structural
-     *                                                             type maps to.
-     * @param ResourcePropertyDescription[]  $propertyDescriptions Descriptions for each of the properties.
+     * @param string                          $name                           The name of the complex type (may only
+     *                                                                        contain alphanumeric characters and the
+     *                                                                        underscore).
+     * @param \ReflectionClass                $reflection                     Reflection of the class this structural
+     *                                                                        type maps to.
+     * @param StructuralPropertyDescription[] $structuralPropertyDescriptions Descriptions for each of the properties.
      * 
      * @throws InvalidArgumentException Thrown if the name contains illegal characters.
      *                                  Thrown if the property description list is empty.
@@ -42,6 +46,8 @@ class ComplexType extends StructuredType
         array $structuralPropertyDescriptions = array()
     ) {
         parent::__construct($name, $reflection);
+
+        $this->structuralPropertyDescriptions = new Map();
 
         foreach ($structuralPropertyDescriptions as $propertyDescription) {
             $this->addStructuralPropertyDescription($propertyDescription);
@@ -62,9 +68,7 @@ class ComplexType extends StructuredType
      */
     public function addStructuralPropertyDescription(StructuralPropertyDescription $propertyDescription)
     {
-        $propertyDescriptions = $this->getPropertyDescriptions();
-
-        if (isset($propertyDescriptions[$propertyDescription->getName()])) {
+        if ($this->getPropertyDescriptions()->containsKey($propertyDescription->getName())) {
             throw new InvalidArgumentException(sprintf(
                 'Tried to add structural property "%s" to structured type "%s", but this entity type already has a ' .
                 'property with this name. The names of the properties defined on a structured type must be unique.',
@@ -73,48 +77,47 @@ class ComplexType extends StructuredType
             ));
         }
 
-        $this->structuralPropertyDescriptions[$propertyDescription->getName()] = $propertyDescription;
+        $this->structuralPropertyDescriptions->set($propertyDescription->getName(), $propertyDescription);
         $propertyDescription->setStructuredType($this);
     }
     
     /**
-     * Returns the property descriptions for this complex type.
+     * Return a map of property descriptions for this complex type keyed
+     * by property name.
      * 
-     * @return ResourcePropertyDescription[] The property descriptions for this complex type.
+     * @return MapInterface A map of property descriptions for this complex type keyed
+     *                      by property name.
      */
-    public function getPropertyDescriptions() : array
+    public function getPropertyDescriptions() : MapInterface
     {
         return $this->getStructuralPropertyDescriptions();
     }
 
     /**
-     * Returns the structural property descriptions for this complex type.
+     * Returns a map of structural property descriptions for this complex type keyed
+     * by property name.
      *
      * Returns only the structural property descriptions for this complex type, not
      * the navigation property descriptions.
      *
-     * @return StructuralPropertyDescription[] The structural property descriptions for this
-     *                                         complex type.
+     * @return MapInterface A map of structural property descriptions for this complex type keyed
+     *                      by property name.
      */
-    public function getStructuralPropertyDescriptions() : array
+    public function getStructuralPropertyDescriptions() : MapInterface
     {
         return $this->structuralPropertyDescriptions;
     }
     
     /**
      * Searches for a property description on this complex type bases on its name.
+     *
+     * @param string $propertyDescriptionName The name of the property description to search for.
      * 
-     * @return null|ResourcePropertyDescription Returns the resource property with the name searched
-     *                                            for or null if no such property exists.
+     * @return Option Returns the resource property with the name searched for wrapped in Some,
+     *                or None if no such property exists.
      */
-    public function getPropertyDescriptionByName($propertyDescriptionName)
+    public function getPropertyDescriptionByName(string $propertyDescriptionName) : Option
     {
-        $propertyDescriptions = $this->getPropertyDescriptions();
-
-        if (isset($propertyDescriptions[$propertyDescriptionName])) {
-            return $propertyDescriptions[$propertyDescriptionName];
-        }
-
-        return null;
+        return $this->getPropertyDescriptions()->get($propertyDescriptionName);
     }
 }

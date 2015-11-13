@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Rolab\EntityDataModel;
 
+use PhpOption\None;
+use PhpOption\Option;
+use PhpOption\Some;
+
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
@@ -19,7 +23,7 @@ abstract class NamedContainerElement
     private $name;
     
     /**
-     * @var EntityContainer
+     * @var Option
      */
     private $entityContainer;
     
@@ -42,6 +46,7 @@ abstract class NamedContainerElement
         }
         
         $this->name = $name;
+        $this->entityContainer = None::create();
     }
     
     /**
@@ -64,16 +69,16 @@ abstract class NamedContainerElement
      */
     public function setEntityContainer(EntityContainer $entityContainer)
     {
-        $this->entityContainer = $entityContainer;
+        $this->entityContainer = new Some($entityContainer);
     }
     
     /**
      * Returns the entity container the container element is contained in.
      * 
-     * @return null|EntityContainer The entity container the container element is contained in or null if
-     *                              no entity container was set.
+     * @return Option The entity container the container element is contained in wrapped in
+     *                Some or None if no entity container was set.
      */
-    public function getEntityContainer()
+    public function getEntityContainer() : Option
     {
         return $this->entityContainer;
     }
@@ -88,22 +93,24 @@ abstract class NamedContainerElement
      */
     public function isContainedIn(EntityContainer $entityContainer) : bool
     {
-        if (null === $this->getEntityContainer()) {
+        if ($this->getEntityContainer()->isEmpty()) {
             return false;
-        }
+        } else {
+            $currentContainer = $this->getEntityContainer()->get();
 
-        if ($entityContainer === $this->getEntityContainer()) {
-            return true;
-        }
-
-        $parentContainer = $entityContainer->getParentContainer();
-
-        while (null !== $parentContainer) {
-            if ($parentContainer === $this->getEntityContainer()) {
+            if ($entityContainer === $currentContainer) {
                 return true;
             }
 
-            $parentContainer = $parentContainer->getParentContainer();
+            while ($currentContainer->getParentContainer()->isDefined()) {
+                $parentContainer = $currentContainer->getParentContainer()->get();
+
+                if ($parentContainer === $this->getEntityContainer()) {
+                    return true;
+                }
+
+                $currentContainer = $parentContainer;
+            }
         }
 
         return false;

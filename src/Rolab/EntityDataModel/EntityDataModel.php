@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Rolab\EntityDataModel;
 
+use PhpCollection\Map;
+use PhpCollection\MapInterface;
+use PhpOption\Option;
+use PhpOption\Some;
+
 use Rolab\EntityDataModel\Type\StructuredType;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
@@ -26,24 +31,24 @@ class EntityDataModel
     private $realNamespace;
 
     /**
-     * @var string
+     * @var Option
      */
     private $namespaceAlias;
 
     /**
-     * @var EntityDataModel[]
+     * @var MapInterface
      */
-    private $referencedModels = array();
+    private $referencedModels;
 
     /**
-     * @var StructuredType[]
+     * @var MapInterface
      */
-    private $structuredTypes = array();
+    private $structuredTypes;
 
     /**
-     * @var StructuredType[]
+     * @var MapInterface
      */
-    private $structuredTypesByClassName = array();
+    private $structuredTypesByClassName;
 
     /**
      * Create new entity data model.
@@ -71,10 +76,10 @@ class EntityDataModel
         }
 
         $this->realNamespace = $realNamespace;
-
-        if (null !== $namespaceAlias) {
-            $this->setNamespaceAlias($namespaceAlias);
-        }
+        $this->namespaceAlias = Option::fromValue($namespaceAlias);
+        $this->referencedModels = new Map();
+        $this->structuredTypes = new Map();
+        $this->structuredTypesByClassName = new Map();
     }
 
     /**
@@ -98,12 +103,13 @@ class EntityDataModel
     }
 
     /**
-     * Returns the namespace alias used by this entity data model to allow easy
-     * referencing and enhance readibility.
+     * Returns the namespace alias of the entity data model wrapped on Some or None if
+     * no namespace alias was specified.
      *
-     * @return string The namespace alias of the entity data model.
+     * @return Option The namespace alias of the entity data model wrapped on Some or None if no namespace alias
+     *                was specified.
      */
-    public function getNamespaceAlias()
+    public function getNamespaceAlias() : Option
     {
         return $this->namespaceAlias;
     }
@@ -120,7 +126,7 @@ class EntityDataModel
      */
     public function getNamespace() : string
     {
-        return isset($this->namespaceAlias) ? $this->namespaceAlias : $this->realNamespace;
+        return $this->namespaceAlias->getOrElse($this->realNamespace);
     }
 
     /**
@@ -144,7 +150,7 @@ class EntityDataModel
             ));
         }
 
-        $this->namespaceAlias = $namespaceAlias;
+        $this->namespaceAlias = new Some($namespaceAlias);
     }
 
     /**
@@ -176,7 +182,7 @@ class EntityDataModel
     {
         $namespace = $namespaceAlias ?? $referencedModel->getNamespace();
 
-        if (isset($this->referencedModels[$namespace]) || $namespace === $this->getNamespace()) {
+        if ($this->referencedModels->containsKey($namespace) || $namespace === $this->getNamespace()) {
             throw new InvalidArgumentException(sprintf(
                 'Namespace "%s" is already used by some other referenced entity data model. Specify a (different) ' .
                 'namespace alias if you wish to reference this model.',
@@ -184,15 +190,16 @@ class EntityDataModel
             ));
         }
 
-        $this->referencedModels[$namespace] = $referencedModel;
+        $this->referencedModels->set($namespace, $referencedModel);
     }
 
     /**
-     * Returns the entity data models referenced by the current entity data model.
+     * Returns the entity data models referenced by the entity data model.
      *
-     * @return EntityDataModel[] An array of the entity data models referenced by the entity data model.
+     * @return MapInterface Map of the entity data models referenced by the entity data model
+     *                      keyed by their namespace or namespace alias of specified.
      */
-    public function getReferencedModels() : array
+    public function getReferencedModels() : MapInterface
     {
         return $this->referencedModels;
     }
@@ -205,12 +212,12 @@ class EntityDataModel
      *
      * @param string $namespace The namespace or namespace alias of the referenced model.
      *
-     * @return null|EntityDataModel Returns the referenced entity data model if a match was
-     *                              found for the namespace or null.
+     * @return Option Returns the referenced entity data model wrapped in Some if a match was
+     *                found for the namespace, None otherwise.
      */
-    public function getReferencedModelByNamespace(string $namespace)
+    public function getReferencedModelByNamespace(string $namespace) : Option
     {
-        return isset($this->referencedModels[$namespace]) ? $this->referencedModels[$namespace] : null;
+        return $this->referencedModels->get($namespace);
     }
 
     /**
@@ -229,7 +236,7 @@ class EntityDataModel
      */
     public function addStructuredType(StructuredType $structuredType)
     {
-        if (isset($this->structuredTypes[$structuredType->getName()])) {
+        if ($this->structuredTypes->containsKey($structuredType->getName())) {
             throw new InvalidArgumentException(sprintf(
                 'Tried to add a structured type named "%s" to entity data model "%s", but a structured type with ' .
                 'with the same name already exists in this model. Structured type names must be unique within an ' .
@@ -239,7 +246,7 @@ class EntityDataModel
             ));
         }
 
-        if (isset($this->structuredTypesByClassName[$structuredType->getClassName()])) {
+        if ($this->structuredTypesByClassName->containsKey($structuredType->getClassName())) {
             throw new InvalidArgumentException(sprintf(
                 'Tried to add a structured type of class "%s" to entity data model "%s", but a structured type with ' .
                 'of the same class already exists in this model. Structured type classes must be unique within an ' .
@@ -249,8 +256,8 @@ class EntityDataModel
             ));
         }
 
-        $this->structuredTypes[$structuredType->getName()] = $structuredType;
-        $this->structuredTypesByClassName[$structuredType->getClassName()] = $structuredType;
+        $this->structuredTypes->set($structuredType->getName(), $structuredType);
+        $this->structuredTypesByClassName->set($structuredType->getClassName(), $structuredType);
 
         $structuredType->setEntityDataModel($this);
     }
@@ -262,9 +269,9 @@ class EntityDataModel
      * will not return any structured types contained in the referenced entity data
      * models.
      *
-     * @return StructuredType[] An array of the structured types contained in the entity data model.
+     * @return MapInterface The structured types contained in the entity data model keyed by name.
      */
-    public function getStructuredTypes() : array
+    public function getStructuredTypes() : MapInterface
     {
         return $this->structuredTypes;
     }
@@ -281,17 +288,16 @@ class EntityDataModel
      * @param string $name The name of the structured type to be searched for (case sensitive)
      *                     without a namespace prefix.
      *
-     * @return null|StructuredType A structured type with the name searched for or null if no
-     *                             structured type could be found with that name in the
-     *                             entity data model.
+     * @return Option A structured type with the name searched wrapped in Some  or None if no
+     *                structured type could be found with that name in the entity data model.
      *
      * @see EntityDataModel::findStructuredTypeByFullName() Including the referenced models in
      *                                                      the search based on a namespace
      *                                                      prefix.
      */
-    public function getStructuredTypeByName(string $name)
+    public function getStructuredTypeByName(string $name) : Option
     {
-        return isset($this->structuredTypes[$name]) ? $this->structuredTypes[$name] : null;
+        return $this->structuredTypes->get($name);
     }
 
     /**
@@ -303,20 +309,16 @@ class EntityDataModel
      * including the complete namespace without a leading backslash. Only the current
      * entity data model is searched, the referenced models are not searched.
      *
-     * @param string $className The fully qualified class name (including namespace, with out
+     * @param string $className The fully qualified class name (including namespace, without a
      *                          leading backslash) described by the structured type.
      *
-     * @return null|StructuredType Returns a structured type if a structured type describing
-     *                             the class was found in the entity data model or null if
-     *                             no such structured type was found.
+     * @return Option Returns a structured type wrapped in Some if a structured type describing
+     *                the class was found in the entity data model or None if no such structured
+     *                type was found.
      */
-    public function getStructuredTypeByClassName(string $className)
+    public function getStructuredTypeByClassName(string $className) : Option
     {
-        if (isset($this->structuredTypesByClassName[$className])) {
-            return $this->structuredTypesByClassName[$className];
-        }
-
-        return null;
+        return $this->structuredTypesByClassName->get($className);
     }
 
     /**
@@ -333,20 +335,20 @@ class EntityDataModel
      * @param string $fullName The full name of the structured type to be searched for (case
      *                         sensitive).
      *
-     * @return null|StructuredType The structured type with the name searched for or null
-     *                             if no structured type with that name could be found.
+     * @return Option The structured type with the name searched for wrapped in Some or None
+     *                if no structured type with that name could be found.
      */
-    public function findStructuredTypeByFullName(string $fullName)
+    public function findStructuredTypeByFullName(string $fullName) : Option
     {
         list($namespace, $name) = $this->getNamespaceNameFromFullName($fullName);
 
         if ($namespace === null || $namespace === $this->getRealNamespace() || $namespace === $this->getNamespace()) {
             return $this->getStructuredTypeByName($name);
-        } elseif ($referencedModel = $this->getReferencedModelByNamespace($namespace)) {
-            return $referencedModel->getStructuredTypeByName($name);
+        } else {
+            return $this->getReferencedModelByNamespace($namespace)->flatMap(function ($referencedModel) use ($name) {
+                return $referencedModel->getStructuredTypeByName($name);
+            });
         }
-
-        return null;
     }
 
     /**

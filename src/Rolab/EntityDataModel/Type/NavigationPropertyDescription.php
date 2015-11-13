@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Rolab\EntityDataModel\Type;
 
+use PhpOption\None;
+use PhpOption\Option;
+use PhpOption\Some;
+
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 use Rolab\EntityDataModel\Exception\RuntimeException;
 
@@ -29,7 +33,7 @@ class NavigationPropertyDescription extends ResourcePropertyDescription
     const DELETE_ACTION_SET_DEFAULT = 'set_default';
 
     /**
-     * @var NavigationPropertyDescription
+     * @var Option
      */
     private $partner;
 
@@ -90,6 +94,7 @@ class NavigationPropertyDescription extends ResourcePropertyDescription
         }
 
         $this->onDeleteAction = $onDeleteAction;
+        $this->partner = None::create();
     }
 
     /**
@@ -108,27 +113,31 @@ class NavigationPropertyDescription extends ResourcePropertyDescription
      */
     public function setPartner(NavigationPropertyDescription $partner)
     {
-        if (null === $this->getStructuredType()) {
-            throw new RuntimeException(
-                'Cannot call `setPartner` on a navigation property for which an owner entity type has not yet been ' .
-                'specified. Call `setStructuredType` to set an entity type that owns the navigation property ' .
-                'before calling `setPartner`.'
-            );
-        }
+        $structuredType = $this->getStructuredType()->getOrThrow(new RuntimeException(
+            'Cannot call `setPartner` on a navigation property for which an owner entity type has not yet been ' .
+            'specified. Call `setStructuredType` to set an entity type that owns the navigation property ' .
+            'before calling `setPartner`.'
+        ));
 
-        if (!$partner->getStructuredType()->isSubTypeOf($this->getPropertyValueType())) {
+        $partnerStructuredType = $this->getStructuredType()->getOrThrow(new RuntimeException(
+            'Cannot call `setPartner` with a target navigation property for which an owner entity type has not yet ' .
+            'been specified. Call `setStructuredType` to set an entity type that owns the navigation property ' .
+            'before calling `setPartner`.'
+        ));
+
+        if (!$partnerStructuredType->isSubTypeOf($this->getPropertyValueType())) {
             throw new InvalidArgumentException(sprintf(
                 'Tried to set property "%s" on entity type "%s" as the partner of navigation property "%s" with ' .
                 'value type "%s". The entity type on which a navigation property\'s partner property is defined, ' .
                 'must be a subtype of this navigation property\'s own value type.',
                 $partner->getName(),
-                $partner->getStructuredType()->getFullName(),
+                $partnerStructuredType->getFullName(),
                 $this->getName(),
                 $this->getPropertyValueType()->getFullName()
             ));
         }
 
-        if (!$this->getStructuredType()->isSubTypeOf($partner->getPropertyValueType())) {
+        if (!$structuredType->isSubTypeOf($partner->getPropertyValueType())) {
             throw new InvalidArgumentException(sprintf(
                 'Tried to set property "%s" with value type "%s" as the partner of navigation property "%s" on ' .
                 'entity type "%s". The entity type on which this navigation property is defined, must be a subtype ' .
@@ -136,23 +145,24 @@ class NavigationPropertyDescription extends ResourcePropertyDescription
                 $partner->getName(),
                 $partner->getPropertyValueType()->getFullName(),
                 $this->getName(),
-                $this->getStructuredType()->getFullName()
+                $structuredType->getFullName()
             ));
         }
 
-        $this->partner = $partner;
+        $this->partner = new Some($partner);
     }
 
     /**
-     * Set this navigation property's partner property.
+     * Returns this navigation property's partner property.
      *
      * A navigation property's partner property is a navigation property on this
      * navigation property's target entity type that defines the inverse navigation,
      * back to this navigation property's own entity type.
      *
-     * @return NavigationPropertyDescription|null This navigation property's partner property.
+     * @return Option This navigation property's partner property wrapped in Some, or None
+     *                if no partner property was set.
      */
-    public function getPartner()
+    public function getPartner() : Option
     {
         return $this->partner;
     }

@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Rolab\EntityDataModel;
 
+use PhpCollection\Map;
+use PhpCollection\MapInterface;
+use PhpOption\Option;
+
+use Rolab\EntityDataModel\Exception\RuntimeException;
 use Rolab\EntityDataModel\Type\EntityType;
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 use Rolab\EntityDataModel\Type\NavigationPropertyDescription;
@@ -21,9 +26,9 @@ class EntitySet extends NamedContainerElement
     private $entityType;
 
     /**
-     * @var NavigationPropertyBinding[]
+     * @var MapInterface
      */
-    private $navigationPropertyBindings = array();
+    private $navigationPropertyBindings;
 
     /**
      * Creates a new entity set.
@@ -40,6 +45,7 @@ class EntitySet extends NamedContainerElement
         parent::__construct($name);
         
         $this->entityType = $entityType;
+        $this->navigationPropertyBindings = new Map();
     }
     
     /**
@@ -57,10 +63,9 @@ class EntitySet extends NamedContainerElement
      * Binds a navigation property description on this entity sets entity type to a target entity set in this
      * container.
      *
-     * @param NavigationPropertyDescription $navigationProperty The navigation property on this entity sets entity
-     *                                                          type that is to be bound.
-     * @param EntitySet $targetSet                              The target entity set to bind the navigation property
-     *                                                          to.
+     * @param string    $propertyDescriptionName The name of navigation property on this entity set's entity
+     *                                           type that is to be bound.
+     * @param EntitySet $targetSet               The target entity set to bind the navigation property to.
      *
      * @throws InvalidArgumentException Thrown if the navigation property is not defined on this entity set's entity
      *                                  type.
@@ -69,9 +74,35 @@ class EntitySet extends NamedContainerElement
      *                                  Thrown if the target entity set's entity type is not a subtype of the navigation
      *                                  property's value type.
      */
-    public function bindNavigationProperty(NavigationPropertyDescription $navigationProperty, EntitySet $targetSet)
+    public function bindNavigationProperty(string $propertyDescriptionName, EntitySet $targetSet)
     {
-        if (!$this->getEntityType()->isSubTypeOf($navigationProperty->getStructuredType())) {
+        $navigationProperty = $this->entityType->getPropertyDescriptionByName($propertyDescriptionName)
+            ->getOrThrow(new InvalidArgumentException(sprintf(
+                'Tried to bind a property named "%s" on entity set "%s", but the entity type for this entity set ' .
+                '("%s") does not define a property with that name.',
+                $propertyDescriptionName,
+                $this->getName(),
+                $this->entityType->getName()
+            )));
+
+        if (!$navigationProperty instanceof NavigationPropertyDescription) {
+            throw new InvalidArgumentException(sprintf(
+                'Tried to bind a property named "%s" on entity set "%s" with entity type "%s%, but this property ' .
+                'is not a navigation property.',
+                $propertyDescriptionName,
+                $this->getName(),
+                $this->entityType->getName()
+            ));
+        }
+
+        $navigationPropertyOwnerType = $navigationProperty->getStructuredType()
+            ->getOrThrow(new InvalidArgumentException(
+                'Cannot bind a navigation property for which an owner entity type has not yet been specified. ' .
+                'Call `setStructuredType` to set an entity type that owns the navigation property before trying to ' .
+                'bind it on an entity set.'
+            ));
+
+        if (!$this->getEntityType()->isSubTypeOf($navigationPropertyOwnerType)) {
             throw new InvalidArgumentException(sprintf(
                 'Tried to set a binding for navigation property "%s" on entity set "%s" for entity type "%s", but ' .
                 'this navigation property is not defined on that entity type. You can only bind a navigation ' .
@@ -82,7 +113,31 @@ class EntitySet extends NamedContainerElement
             ));
         }
 
-        if (!$targetSet->isContainedIn($this->getEntityContainer())) {
+        if (!$targetSet->getEntityType()->isSubTypeOf($navigationProperty->getPropertyValueType())) {
+            throw new InvalidArgumentException(sprintf(
+                'Tried to bind entity set "%s", defined on entity type "%s", to navigation property "%s" with ' .
+                'property value type "%s". Cannot bind a navigation property to an entity set on an entity type ' .
+                'that is not a subtype of the navigation property\'s value type.',
+                $targetSet->getName(),
+                $targetSet->getEntityType()->getFullName(),
+                $navigationProperty->getName(),
+                $navigationProperty->getPropertyValueType()->getFullName()
+            ));
+        }
+
+        $entityContainer = $this->getEntityContainer()->getOrThrow(new RuntimeException(
+            'Cannot bind a navigation property on an entity set for which no entity container has been specified.' .
+            'Call `setEntityContainer` to set an entity container on the entity set before trying to bind a ' .
+            'navigation property on it.'
+        ));
+
+        $targetSetContainer = $targetSet->getEntityContainer()->getOrThrow(new InvalidArgumentException(
+            'Cannot bind a navigation property to an entity set for which no entity container has been specified.' .
+            'Call `setEntityContainer` to set an entity container on the target entity set before trying to bind ' .
+            'it to a navigation property.'
+        ));
+
+        if (!$targetSet->isContainedIn($entityContainer)) {
             throw new InvalidArgumentException(sprintf(
                 'Tried to bind navigation property "%s" to target entity set "%s" for origin entity set "%s", but ' .
                 'the target entity set is not contained in the same container ("%s") as the origin entity set ' .
@@ -90,22 +145,40 @@ class EntitySet extends NamedContainerElement
                 $navigationProperty->getName(),
                 $targetSet->getName(),
                 $this->getName(),
-                $targetSet->getEntityContainer()->getFullName(),
-                $this->getEntityContainer()->getFullName()
+                $targetSetContainer->getFullName(),
+                $entityContainer->getFullName()
             ));
         }
 
-        $this->navigationPropertyBindings[$navigationProperty->getName()] =
-            new NavigationPropertyBinding($navigationProperty, $targetSet);
+        $this->navigationPropertyBindings->set($propertyDescriptionName, $targetSet);
     }
 
     /**
-     * Returns the navigation property bindings for this entity set.
+     * Returns a map describing the navigation property bindings where the key is
+     * the navigation property description's name and the value is the target
+     * entity set
      *
-     * @return NavigationPropertyBinding[] The navigation property bindings for this entity set.
+     * @return MapInterface A map describing the navigation property bindings where the key is
+     *                      the navigation property description's name and the value is the target
+     *                      entity set
      */
-    public function getNavigationPropertyBindings() : array
+    public function getNavigationPropertyBindings() : MapInterface
     {
         return $this->navigationPropertyBindings;
+    }
+
+    /**
+     * Returns the target set for the navigation property wrapped in Some, or None if no
+     * binding exists for the navigation property.
+     *
+     * @param NavigationPropertyDescription $navigationProperty The navigation property to resolve the bound target
+     *                                                          entity set for.
+     *
+     * @return Option The target set for the navigation property wrapped in Some, or None if no
+     *                binding exists for the navigation property.
+     */
+    public function getNavigationPropertyBindingFor(NavigationPropertyDescription $navigationProperty) : Option
+    {
+        return $this->navigationPropertyBindings->get($navigationProperty->getName());
     }
 }

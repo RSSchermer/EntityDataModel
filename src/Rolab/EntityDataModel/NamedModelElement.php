@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Rolab\EntityDataModel;
 
+use PhpOption\None;
+use PhpOption\Option;
+use PhpOption\Some;
+
 use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 
 /**
@@ -14,7 +18,7 @@ use Rolab\EntityDataModel\Exception\InvalidArgumentException;
 abstract class NamedModelElement implements NamedModelConstruct
 {
     /**
-     * @var EntityDataModel
+     * @var Option
      */
     private $entityDataModel;
 
@@ -42,6 +46,7 @@ abstract class NamedModelElement implements NamedModelConstruct
         }
 
         $this->name = $name;
+        $this->entityDataModel = None::create();
     }
 
     /**
@@ -63,16 +68,16 @@ abstract class NamedModelElement implements NamedModelConstruct
      */
     public function setEntityDataModel(EntityDataModel $entityDataModel)
     {
-        $this->entityDataModel = $entityDataModel;
+        $this->entityDataModel = new Some($entityDataModel);
     }
     
     /**
      * Returns the entity data model the named model element is a part of.
      * 
-     * @return null|EntityDataModel The entity data model the named model element is a part of
-     *                              or null if no entity data model is assigned yet.
+     * @return Option The entity data model the named model element is a part of wrapped in Some
+     *                or None if no entity data model is assigned yet.
      */
-    public function getEntityDataModel()
+    public function getEntityDataModel() : Option
     {
         return $this->entityDataModel;
     }
@@ -82,7 +87,9 @@ abstract class NamedModelElement implements NamedModelConstruct
      */
     public function getNamespace() : string
     {
-        return isset($this->entityDataModel) ? $this->entityDataModel->getNamespace() : "";
+        return $this->entityDataModel->map(function ($model) {
+            return $model->getNamespace();
+        })->getOrElse("");
     }
     
     /**
