@@ -12,14 +12,8 @@
          bootstrap="tests/bootstrap.php"
 >
     <testsuites>
-        <testsuite name="EntityDataModel Test Suite">
-            <directory>./tests/EntityDataModel/</directory>
+        <testsuite name="OData Test Suite">
+            <directory>./tests/OData</directory>
         </testsuite>
     </testsuites>
-    
-    <groups>
-        <exclude>
-            <group>performance</group>
-        </exclude>
-    </groups>    
 </phpunit>

@@ -1,8 +1,8 @@
 {
-    "name": "rolab/entity-data-model",
+    "name": "rsschermer/entity-model",
     "type": "library",
-    "description": "PHP implementation of Entity Data Model.",
-    "keywords": ["entity", "data", "model", "metadata"],
+    "description": "Detailed entity model metadata in PHP.",
+    "keywords": ["model", "schema", "metadata"],
     "license": "MIT",
     "authors": [
         {
@@ -22,8 +22,8 @@
         "phpunit/phpunit": "5.0.*"
     },
     "autoload": {
-        "psr-0": {
-            "Rolab\\EntityDataModel\\": "src/"
+        "psr-4": {
+            "RSSchermer\\EntityModel\\": "src/"
         }
     },
     "extra": {

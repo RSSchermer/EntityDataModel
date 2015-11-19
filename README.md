@@ -1,10 +1,3 @@
-#PHP implementation of Entity Data Model
+# Entity Model
 
-SHOULD BE CONSIDERED VERY EARLY ALPHA
-
-Rudimentary implementation of Entity Data Model. Primary usecase is to allow construction
-of an Entity Data Model to serve as context in OData Serialization. 
-
-TODO:
-- Edm caching
-- Value type validator
+Library for defining detailed entity model metadata in PHP.
